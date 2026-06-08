@@ -1,0 +1,525 @@
+contract_version: 1.0.0
+skill:
+  name: 06_data_design
+  stage: 06 Data Design
+  title: Data Design
+  skill_path: /skills/06_data_design/SKILL.md
+  readme_path: /skills/06_data_design/README.md
+  primary_output: /workflow/06_data/result.md
+  requires_human_approval: true
+purpose:
+  summary: Orchestrate Stage 6 Data Design through split sub-skills and prepare official data design artifacts for human approval.
+  core_question: Given approved requirements, domain model, and architecture contracts, what data structures, relationships,
+    constraints, access rules, query patterns, indexes, migration approach, and retention/deletion policies are needed?
+input_contract:
+  always_read:
+  - path: /workflow/context/artifact_manifest.yml
+    required: true
+    purpose: Track artifact existence, status, approval, and supersession.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/context_packet.md
+    required: true
+    purpose: Read the minimal operational context prepared by the previous stage.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/DECISIONS.md
+    required: true
+    purpose: Use only human-approved decisions as source of truth.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/ASSUMPTIONS.md
+    required: false
+    purpose: Check active working assumptions that may affect data design.
+    source_of_truth: false
+    approval_required: false
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    required: false
+    purpose: Check unresolved questions that may affect schema, access, retention, or migration.
+    source_of_truth: false
+    approval_required: false
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    required: false
+    purpose: Avoid reviving rejected or superseded data or architecture options.
+    source_of_truth: false
+    approval_required: false
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    required: false
+    purpose: Preserve links across requirements, domain, architecture, data, tasks, tests, and evidence.
+    source_of_truth: false
+    approval_required: false
+  - path: /workflow/context/APPROVAL_LOG.md
+    required: false
+    purpose: Confirm explicit human approvals when available.
+    source_of_truth: false
+    approval_required: false
+  - path: /workflow/01_goal/01_service_goal.md
+    required: true
+    purpose: Understand service purpose and success criteria.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/02_stakeholders_risk/02_stakeholders.md
+    required: true
+    purpose: Understand roles, actors, operators, and affected stakeholders.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/02_stakeholders_risk/02_risk_privacy_screening.md
+    required: true
+    purpose: Identify personal/sensitive data, security, privacy, and compliance constraints.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/03_requirements/03_requirements.md
+    required: true
+    purpose: Extract functional and non-functional data needs.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/03_requirements/03_acceptance_criteria.md
+    required: true
+    purpose: Link data behavior to verifiable acceptance conditions.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/04_domain/04_ubiquitous_language.md
+    required: true
+    purpose: Use approved domain terms consistently.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/04_domain/04_domain_model.md
+    required: true
+    purpose: Map data objects to domain concepts, entities, value objects, and aggregates.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/04_domain/04_business_rules_invariants.md
+    required: true
+    purpose: Preserve invariants, lifecycle rules, and consistency constraints.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/05_architecture/05_architecture_plan.md
+    required: true
+    purpose: Align data design with architecture direction.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/05_architecture/05_module_boundaries.md
+    required: true
+    purpose: Identify data ownership and module boundaries.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/05_architecture/05_architecture_decisions.md
+    required: true
+    purpose: Use approved technical and storage-related decisions.
+    source_of_truth: true
+    approval_required: true
+  read_if_applicable:
+  - path: /workflow/00_intake/00_existing_context_review.md
+    condition: If this is a brownfield or migration project.
+    purpose: Capture existing data stores, constraints, compatibility, and migration risks.
+  - path: /workflow/04_domain/04_bounded_contexts.md
+    condition: If bounded contexts exist.
+    purpose: Align data ownership with bounded contexts.
+  - path: /workflow/04_domain/04_domain_events.md
+    condition: If events, workflows, or async behavior exist.
+    purpose: Identify event data, audit trails, and derived projections.
+  - path: /workflow/05_architecture/05_api_contracts.md
+    condition: If APIs exist.
+    purpose: Derive read/write/query patterns and data contract needs.
+  - path: /workflow/05_architecture/05_integration_contracts.md
+    condition: If external systems exist.
+    purpose: Map imported, exported, synchronized, and externally owned data.
+  - path: /workflow/05_architecture/05_authz_model.md
+    condition: If roles or permissions affect data visibility or mutation.
+    purpose: Design data security rules and authorization-aware query constraints.
+  - path: /workflow/05_architecture/05_event_contracts.md
+    condition: If async messaging or domain events exist.
+    purpose: Define event payload persistence and event-related data models.
+  - path: /workflow/05_architecture/05_observability_policy.md
+    condition: If audit, logging, monitoring, or observability data exists.
+    purpose: Classify operational data and retention requirements.
+  - path: /workflow/05_architecture/05_error_handling_policy.md
+    condition: If error state must be persisted or audited.
+    purpose: Design error, retry, dead-letter, or recovery data behavior.
+  do_not_read_by_default:
+  - path_or_pattern: full historical agent logs
+    reason: Prompt history is not a source of truth.
+  - path_or_pattern: unrelated previous stage drafts
+    reason: Use approved artifacts and relevant current drafts only.
+  - path_or_pattern: superseded artifacts
+    reason: Superseded artifacts must not define current data design.
+  - path_or_pattern: rejected artifacts or rejected options
+    reason: Rejected options must not be revived unless explicitly reopened.
+  - path_or_pattern: implementation code, migrations, ORM models, or security-rule files
+    reason: Stage 6 is a design stage, not an implementation stage, unless a brownfield review explicitly requires inspection.
+  missing_input_handling:
+    missing_required_input: Report the missing input, explain why it matters, classify it as blocking or non-blocking, and
+      stop if safe progress is impossible.
+    missing_stage_input: Proceed only with clearly labeled working assumptions when the gap is non-blocking.
+    no_project_context: Do not invent project-specific data design. Produce a blocker report or template-level guidance only.
+    conflicting_inputs: Report the conflicting sources and stop if the conflict affects schema, access control, privacy, migration,
+      or release feasibility.
+    draft_or_unapproved_inputs: Use only if the user explicitly requests draft-based progress; label all outputs as draft
+      and list approval risks.
+user_directives:
+  path: /workflow/06_data/USER_DIRECTIVES.md
+  required_if_exists: true
+  handling_rules:
+  - Read before executing the SKILL.
+  - Classify directives as approval, correction, preference, rejection, scope change, constraint, question, or new input.
+  - Do not treat every directive as a globally approved decision.
+  - Report conflicts with approved decisions.
+  - Do not modify USER_DIRECTIVES.md unless explicitly instructed.
+output_contract:
+  mandatory_artifacts:
+  - path: /workflow/06_data/06_conceptual_data_model.md
+    purpose: Conceptual data model and data scope.
+    required: true
+    approval_required: true
+    status_values: &id001
+    - Draft
+    - Approved
+    - Needs Review
+    required_sections:
+    - Purpose
+    - Inputs Used
+    - Data Scope
+    - Conceptual Data Objects
+    - Data Ownership and Boundaries
+    - Source-of-Truth Classification
+    - Sensitive / Personal / Regulated Data Classification
+    - Decision Candidates
+    - Working Assumptions
+    - Open Questions
+  - path: /workflow/06_data/06_logical_schema.md
+    purpose: Technology-neutral logical schema.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Purpose
+    - Inputs Used
+    - Schema Overview
+    - Logical Records / Entities / Documents
+    - Fields and Field Semantics
+    - Identifiers and References
+    - Relationships
+    - Constraints and Validation Rules
+    - Sensitive Fields
+    - Decision Candidates
+    - Working Assumptions
+    - Open Questions
+  - path: /workflow/06_data/06_query_patterns.md
+    purpose: Query and access patterns derived from requirements, APIs, screens, jobs, reports, and integrations.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Purpose
+    - Query Pattern Summary
+    - Query Patterns by Requirement / API / Screen / Job
+    - Filtering, Sorting, Pagination, and Search Needs
+    - Authorization-Aware Query Notes
+    - Index Implications
+    - Open Questions
+  - path: /workflow/06_data/06_data_design_traceability.md
+    purpose: Traceability across requirements, domain, architecture, data objects, queries, rules, and migration items.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Traceability Scope
+    - Requirement to Data Object Links
+    - Acceptance Criteria to Query Pattern Links
+    - Domain Concept / Aggregate to Data Object Links
+    - Architecture Module / API to Data Object Links
+    - Data Object to Security Rule Links
+    - Traceability Gaps
+  - path: /workflow/06_data/result.md
+    purpose: Stage 6 summary, N/A record, risks, decision candidates, and approval gate.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Task Summary
+    - Inputs Used
+    - Outputs Created or Updated
+    - Key Data Design Findings
+    - Decision Candidates
+    - Working Assumptions
+    - Open Questions
+    - Risks and Constraints
+    - N/A Items
+    - Traceability Updates
+    - Human Approval Required
+    - Recommended Next Step
+  - path: /workflow/context/context_packet.md
+    purpose: Minimal operational context for Stage 7.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Current Project State
+    - Approved Decisions
+    - Working Assumptions
+    - Open Questions
+    - Rejected / Superseded Options
+    - Constraints That Must Not Be Violated
+    - Key Context for Next Stage
+    - Required Inputs for Next Stage
+    - Do Not Do
+  conditional_artifacts:
+  - path: /workflow/06_data/06_physical_schema.md
+    condition: If storage technology is approved or a clearly marked candidate physical design is needed.
+    purpose: Concrete storage structures, transaction boundaries, and storage-specific trade-offs.
+    n_a_record_required: true
+  - path: /workflow/06_data/06_indexes.md
+    condition: If query patterns, uniqueness constraints, ordering/filtering, pagination, search, or security rules require
+      indexes.
+    purpose: Index strategy linked to query patterns and trade-offs.
+    n_a_record_required: true
+  - path: /workflow/06_data/06_data_security_rules.md
+    condition: If access control, personal data, sensitive data, multi-tenant data, or data-dependent authorization exists.
+    purpose: Create/read/update/delete/export/restore rule intent by role, condition, and enforcement layer.
+    n_a_record_required: true
+  - path: /workflow/06_data/06_retention_deletion_policy.md
+    condition: If persisted data has retention, deletion, purge, archival, backup, or user-requested deletion implications.
+    purpose: Retention/deletion rules and lifecycle obligations.
+    n_a_record_required: true
+  - path: /workflow/06_data/06_migration_plan.md
+    condition: If schema/data migration, import, compatibility, or environment promotion is needed.
+    purpose: Migration items, validation checks, ordering, and rollback/recovery concepts.
+    n_a_record_required: true
+  - path: /workflow/06_data/06_data_dictionary.md
+    condition: If the project benefits from a normalized field glossary or regulated terminology record.
+    purpose: Data field definitions and classifications.
+    n_a_record_required: true
+  - path: /workflow/06_data/06_seed_fixture_strategy.md
+    condition: If seed data, test fixtures, demo data, or reset behavior is needed.
+    purpose: Seed/fixture purpose, environment, sensitivity, and refresh behavior.
+    n_a_record_required: true
+  - path: /workflow/06_data/06_external_data_mapping.md
+    condition: If external systems own, provide, receive, or synchronize data.
+    purpose: External data ownership, mapping, sync, and transformation notes.
+    n_a_record_required: true
+  - path: /workflow/06_data/06_event_data_model.md
+    condition: If events, outbox/inbox, audit streams, or async workflows need persisted payloads or projections.
+    purpose: Event data structure and retention/audit implications.
+    n_a_record_required: true
+  - path: /workflow/06_data/06_analytics_reporting_model.md
+    condition: If analytics, reporting, BI, metrics, dashboards, or aggregates are in scope.
+    purpose: Analytics/reporting data structures and freshness assumptions.
+    n_a_record_required: true
+  - path: /workflow/06_data/06_blob_object_storage_model.md
+    condition: If files, media, attachments, exports, model artifacts, or object storage are needed.
+    purpose: Blob/object metadata, storage keys, retention, access, and lifecycle behavior.
+    n_a_record_required: true
+  n_a_record:
+    required: true
+    required_fields:
+    - artifact
+    - why_not_applicable
+    - revisit_if
+context_updates:
+  files_to_update:
+  - path: /workflow/context/context_packet.md
+    condition: Always update or prepare for the next stage.
+    update_rule: Include only the minimum operational context needed by Stage 7.
+  - path: /workflow/context/ASSUMPTIONS.md
+    condition: Update if working assumptions exist.
+    update_rule: Record assumptions without treating them as decisions.
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    condition: Update if unresolved questions exist.
+    update_rule: Record questions that may affect later stages.
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    condition: Update if options were explicitly rejected or superseded.
+    update_rule: Do not revive rejected options unless explicitly reopened.
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    condition: Update if traceability links are introduced or changed.
+    update_rule: Use stable IDs and preserve existing links.
+  context_packet:
+    path: /workflow/context/context_packet.md
+    purpose: Prepare minimal context for the next stage or sub-skill.
+    next_stage: 07_mvp_release_slicing
+    required_sections:
+    - Current Project State
+    - Approved Decisions
+    - Working Assumptions
+    - Open Questions
+    - Rejected / Superseded Options
+    - Constraints That Must Not Be Violated
+    - Key Context for Next Stage
+    - Required Inputs for Next Stage
+    - Do Not Do
+traceability:
+  id_conventions:
+    goals: G-001, G-002
+    requirements: REQ-001, REQ-002
+    acceptance_criteria: AC-001, AC-002
+    domain_concepts: DOM-001, DOM-002
+    architecture_components: ARCH-001, ARCH-002
+    conceptual_data_objects: DATA-OBJ-001, DATA-OBJ-002
+    logical_schema_objects: DSCH-001, DSCH-002
+    physical_schema_objects: PHY-001, PHY-002
+    query_patterns: QP-001, QP-002
+    indexes: IDX-001, IDX-002
+    data_security_rules: DSR-001, DSR-002
+    retention_rules: RET-001, RET-002
+    migration_items: MIG-001, MIG-002
+    assumptions: A-001, A-002
+    questions: Q-001, Q-002
+    risks: R-001, R-002
+  required_links:
+  - Requirement -> Acceptance Criteria -> Domain Concept / Aggregate -> Architecture Module / API -> Data Object -> Query
+    Pattern -> Index / Security Rule / Migration Item
+  prohibited_links:
+  - Do not invent upstream requirement, acceptance criteria, domain, architecture, or API IDs.
+  - Do not link downstream tasks, tests, or implementation evidence prematurely unless revising after later stages.
+classification_rules:
+  approved_decision:
+    rule: Only explicit human approval can create an approved decision.
+    examples:
+    - Approved storage technology, approved schema, approved data security rule direction, approved migration strategy.
+  decision_candidate:
+    rule: Agent recommendations awaiting human approval must be marked as decision candidates.
+  working_assumption:
+    rule: Temporary beliefs needed for progress must remain assumptions until confirmed.
+  open_question:
+    rule: Unresolved issues that may affect later work must be recorded as open questions.
+  rejected_option:
+    rule: Explicitly rejected or superseded options must be recorded and not revived unless reopened.
+  recommendation:
+    rule: Recommendations are not decisions and must not be recorded as approved.
+approval_gate:
+  required: true
+  decisions_to_approve:
+  - conceptual data model
+  - logical schema
+  - query patterns
+  - physical schema if applicable
+  - data ownership and source-of-truth boundaries
+  - data security rule direction
+  - retention/deletion policy direction
+  - migration and seed strategy if applicable
+  - conditional artifacts marked N/A
+  assumptions_to_confirm:
+  - working assumptions that affect schema, ownership, access control, retention, deletion, migration, or release slicing
+  open_questions_to_resolve:
+  - open questions that block safe downstream MVP slicing or implementation planning
+  risks_to_review:
+  - data loss risk
+  - privacy risk
+  - security risk
+  - migration risk
+  - performance risk
+  - scope/release risk
+  artifacts_ready_for_review:
+  - /workflow/06_data/06_conceptual_data_model.md
+  - /workflow/06_data/06_logical_schema.md
+  - /workflow/06_data/06_query_patterns.md
+  - /workflow/06_data/06_data_design_traceability.md
+  - /workflow/06_data/result.md
+  - /workflow/context/context_packet.md
+validation:
+  checklist:
+  - Sub-skills are run in order or skipped only with explicit rationale.
+  - Official artifacts exist or have N/A rationale.
+  - Traceability links are preserved and gaps are reported.
+  - No output is treated as approved without human approval.
+  failure_conditions:
+  - required approved input is missing
+  - source artifacts conflict
+  - security/privacy input is missing for sensitive data
+  - authorization model is missing when access control affects data
+  - storage decision is missing when physical design is required
+  - required output cannot be produced or N/A rationale is missing
+  blocker_report_required: true
+  blocker_report_fields:
+  - blocking_issue
+  - why_it_matters
+  - affected_artifacts_or_stages
+  - safe_partial_work_completed
+  - human_decision_needed
+prohibited_actions:
+- Do not run the parent skill as one large uncontrolled data design task.
+- Do not make downstream stages depend on internal sub-skill outputs.
+- Do not create project artifacts while generating support files.
+- Do not create implementation code, migrations, ORM models, security-rule files, or tests in Stage 6.
+specialization_hooks:
+  allowed: true
+  examples:
+  - name: web_saas
+    may_add:
+    - tenant data boundaries
+    - role-based access rules
+    - PII retention concerns
+  - name: internal_tool
+    may_add:
+    - operator workflows
+    - audit requirements
+    - organizational data ownership
+  - name: mobile_app
+    may_add:
+    - offline/sync data
+    - device permission data
+    - local cache retention
+  - name: ai_data_product
+    may_add:
+    - dataset provenance
+    - label data
+    - evaluation and model output records
+  - name: regulated_security_sensitive
+    may_add:
+    - compliance classifications
+    - audit log policy
+    - privacy impact constraints
+  - name: brownfield_legacy
+    may_add:
+    - existing schema review
+    - migration constraints
+    - compatibility requirements
+  must_not_change:
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries
+tool_wrapper_hooks:
+  allowed:
+  - file_creation_commands
+  - save_locations
+  - sandbox_rules
+  - review_workflow
+  - command_invocation_conventions
+  must_not_change:
+  - stage_reasoning
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries
+stage_contract:
+  public_interface: true
+  internal_split: true
+  downstream_depends_on:
+  - approved_stage_artifacts
+  downstream_must_not_depend_on:
+  - internal_subskill_outputs
+  - subskill_folder_names
+  - prompt_history
+  - agent_chat_history
+  - unapproved_drafts
+subskills:
+  execution_order:
+  - id: 06a
+    name: data_scope_conceptual_model
+    path: /skills/06_data_design/06a_data_scope_conceptual_model/SKILL.md
+  - id: 06b
+    name: logical_schema_query_patterns
+    path: /skills/06_data_design/06b_logical_schema_query_patterns/SKILL.md
+  - id: 06c
+    name: physical_schema_indexes
+    path: /skills/06_data_design/06c_physical_schema_indexes/SKILL.md
+  - id: 06d
+    name: security_retention_migration
+    path: /skills/06_data_design/06d_security_retention_migration/SKILL.md
+  - id: 06e
+    name: data_design_finalizer
+    path: /skills/06_data_design/06e_data_design_finalizer/SKILL.md
+  finalizer_required: true
+  finalizer_path: /skills/06_data_design/06e_data_design_finalizer/SKILL.md

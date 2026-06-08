@@ -1,0 +1,1 @@
+# Artifact: 04 Domain Model

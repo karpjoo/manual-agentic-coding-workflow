@@ -1,0 +1,533 @@
+contract_version: 1.0.0
+skill:
+  name: 09_task_breakdown
+  stage: 09 Task Breakdown
+  title: Task Breakdown
+  skill_path: /skills/09_task_breakdown/SKILL.md
+  readme_path: /skills/09_task_breakdown/README.md
+  primary_output: /workflow/09_tasks/result.md
+  requires_human_approval: true
+  internal_split: true
+purpose:
+  summary: Convert approved scope, architecture, data design, and validation strategy into small, ordered, traceable implementation
+    tasks.
+  core_question: How should the approved MVP or release scope be decomposed into safe, traceable, dependency-ordered implementation
+    tasks with clear acceptance criteria, required tests, change scope, and definition of done?
+stage_contract:
+  public_interface: true
+  downstream_depends_on:
+  - approved_stage_artifacts
+  downstream_must_not_depend_on:
+  - internal_subskill_outputs
+  - subskill_folder_names
+  - prompt_history
+  - unapproved_drafts
+  previous_stage: 08_test_strategy_validation
+  next_stage: 10_implementation_prompt_writing
+  finalizer_required: true
+subskills:
+  execution_order:
+  - id: 09a
+    name: 09a_task_source_mapping
+    path: /skills/09_task_breakdown/09a_task_source_mapping/SKILL.md
+  - id: 09b
+    name: 09b_task_inventory_and_cards
+    path: /skills/09_task_breakdown/09b_task_inventory_and_cards/SKILL.md
+  - id: 09c
+    name: 09c_dependency_ordering
+    path: /skills/09_task_breakdown/09c_dependency_ordering/SKILL.md
+  - id: 09d
+    name: 09d_traceability_and_quality_review
+    path: /skills/09_task_breakdown/09d_traceability_and_quality_review/SKILL.md
+  - id: 09e
+    name: 09e_task_breakdown_finalizer
+    path: /skills/09_task_breakdown/09e_task_breakdown_finalizer/SKILL.md
+input_contract:
+  always_read:
+  - path: /workflow/context/artifact_manifest.yml
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/context_packet.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/DECISIONS.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/ASSUMPTIONS.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/APPROVAL_LOG.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/03_requirements/03_requirements.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/03_requirements/03_acceptance_criteria.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/05_architecture/05_architecture_plan.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/05_architecture/05_module_boundaries.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/07_mvp_release/07_mvp_scope.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/07_mvp_release/07_release_slices.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/07_mvp_release/07_out_of_scope.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/08_test_strategy/08_test_strategy.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/08_test_strategy/08_acceptance_tests.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/08_test_strategy/08_validation_commands.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/08_test_strategy/08_manual_test_plan.md
+    required: true
+    purpose: Required source or context for Stage 9 task breakdown.
+    source_of_truth: true
+    approval_required: true
+  read_if_applicable:
+  - path: /workflow/04_domain/04_ubiquitous_language.md
+    condition: Read if domain terminology affects task naming, business rules, or test scenarios.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/04_domain/04_domain_model.md
+    condition: Read if domain entities, value objects, aggregates, or workflows affect task boundaries.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/04_domain/04_business_rules_invariants.md
+    condition: Read if invariants, lifecycle rules, or state transitions require implementation tasks or tests.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/04_domain/04_domain_events.md
+    condition: Read if event-driven behavior, integration behavior, or async workflow exists.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/04_domain/04_bounded_contexts.md
+    condition: Read if module boundaries or cross-context interactions affect task ordering.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/05_architecture/05_api_contracts.md
+    condition: Read if APIs, endpoints, RPCs, webhooks, or service contracts exist.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/05_architecture/05_integration_contracts.md
+    condition: Read if external systems, queues, jobs, LLM/API integrations, or third-party systems exist.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/05_architecture/05_architecture_decisions.md
+    condition: Read if implementation tasks must respect specific technical decisions or trade-offs.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/06_data/06_conceptual_data_model.md
+    condition: Read if persistent domain data exists.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/06_data/06_logical_schema.md
+    condition: Read if database tables, collections, documents, or relationships affect tasks.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/06_data/06_physical_schema.md
+    condition: Read if physical schema or implementation-level persistence is defined.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/06_data/06_indexes.md
+    condition: Read if query performance, filtering, sorting, or pagination tasks exist.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/06_data/06_migration_plan.md
+    condition: Read if schema migration, seed data, compatibility, or rollback tasks are needed.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/06_data/06_data_security_rules.md
+    condition: Read if authorization, document-level security, privacy, or access control tasks exist.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/00_intake/00_existing_context_review.md
+    condition: Read if this is a brownfield, legacy, extension, refactor, migration, or integration project.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/02_stakeholders_risk/02_stakeholders.md
+    condition: Read if user roles, operators, admins, reviewers, or external actors affect task boundaries.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  - path: /workflow/02_stakeholders_risk/02_risk_privacy_screening.md
+    condition: Read if security, privacy, compliance, role, or permission risks affect task design.
+    purpose: Conditional source for task boundary, ordering, validation, or risk handling.
+  do_not_read_by_default:
+  - path_or_pattern: raw agent chat history
+    reason: Prompt history is not a stable source of truth.
+  - path_or_pattern: superseded artifacts
+    reason: Superseded artifacts must not drive current task decisions.
+  - path_or_pattern: rejected artifacts or rejected options
+    reason: Rejected options must not be revived without explicit human instruction.
+  - path_or_pattern: unrelated previous stage drafts
+    reason: Avoid context bloat and accidental use of unapproved drafts.
+  - path_or_pattern: implementation source files
+    reason: Stage 9 normally plans tasks before implementation; read code only when brownfield context requires it.
+  missing_input_handling:
+    missing_required_input: Report the missing input, explain why it matters, classify as blocking or non-blocking, and stop
+      if task decomposition would be unsafe.
+    missing_stage_input: Record the gap in result or local output and continue only with explicit working assumptions when
+      safe.
+    no_project_context: Stop and request project context or approved prior-stage artifacts.
+    conflicting_inputs: Report the conflict, identify sources, explain impact, and do not silently resolve scope, architecture,
+      data, security, or validation conflicts.
+    draft_or_unapproved_inputs: Use only when explicitly allowed; mark outputs as draft and require human review.
+user_directives:
+  path: /workflow/09_tasks/USER_DIRECTIVES.md
+  required_if_exists: true
+  handling_rules:
+  - Read before executing the SKILL.
+  - Classify directives as approval, correction, preference, rejection, scope change, constraint, question, or new input.
+  - Do not treat every directive as a globally approved decision.
+  - Report conflicts with approved decisions.
+output_contract:
+  mandatory_artifacts:
+  - path: /workflow/09_tasks/09_task_inventory.md
+    purpose: Compact inventory of implementation tasks for approved MVP or release slice.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+    required_sections:
+    - Scope Basis
+    - Task ID Convention
+    - Task Summary Table
+    - Task Type Classification
+    - Requirement Coverage Summary
+    - Release Slice Coverage Summary
+    - Blocked or Deferred Tasks
+    - Out-of-Scope Items Not Converted to Tasks
+    - Notes for Stage 10
+  - path: /workflow/09_tasks/09_task_cards.md
+    purpose: Detailed task cards that Stage 10 can convert into implementation prompts.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+    required_sections:
+    - Task Summary
+    - Release Slice
+    - Task Type
+    - Linked Requirement(s)
+    - Linked Acceptance Criteria
+    - Change Scope
+    - Required Tests
+    - Validation Commands
+    - Manual Verification
+    - Definition of Done
+    - Rollback / Recovery Notes
+    - Open Questions
+  - path: /workflow/09_tasks/09_dependency_order.md
+    purpose: Safe dependency and execution order for implementation tasks.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+    required_sections:
+    - Ordering Principles
+    - Sequential Task Chain
+    - Parallelizable Task Groups
+    - Blocked Tasks
+    - Human Decision Required Before Execution
+    - Recommended Stage 10 Prompt Writing Order
+  - path: /workflow/09_tasks/09_traceability_matrix.md
+    purpose: Stage-local traceability from requirements and tests to tasks.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+    required_sections:
+    - Traceability Basis
+    - Requirement-to-Task Matrix
+    - Task-to-Validation Matrix
+    - Coverage Gaps
+    - Stage 10 Readiness Review
+  - path: /workflow/09_tasks/result.md
+    purpose: Stage 9 result summary and human approval gate.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+    required_sections:
+    - Task Summary
+    - Inputs Used
+    - Outputs Created or Updated
+    - Task Breakdown Summary
+    - Dependency Summary
+    - Traceability Updates
+    - Human Approval Required
+  conditional_artifacts:
+  - path: /workflow/09_tasks/09_migration_tasks.md
+    condition: Create if schema migration, seed data, compatibility, rollback, or data backfill tasks exist.
+    purpose: Migration-specific tasks and rollback notes.
+    n_a_record_required: true
+  - path: /workflow/09_tasks/09_security_privacy_tasks.md
+    condition: Create if access control, authorization, privacy, audit logging, data retention, sensitive data, or compliance-sensitive
+      tasks exist.
+    purpose: Security/privacy-sensitive task grouping.
+    n_a_record_required: true
+  - path: /workflow/09_tasks/09_integration_tasks.md
+    condition: Create if external API, webhook, queue, scheduled job, LLM/API integration, or third-party system tasks exist.
+    purpose: Integration task grouping.
+    n_a_record_required: true
+  - path: /workflow/09_tasks/09_frontend_backend_coordination.md
+    condition: Create if frontend and backend work must be coordinated across contracts, schemas, or staged rollout.
+    purpose: Frontend/backend coordination tasks.
+    n_a_record_required: true
+  - path: /workflow/09_tasks/09_risk_reduction_spikes.md
+    condition: Create if implementation requires research, prototype, technical spike, unknown library behavior, performance
+      investigation, or feasibility validation.
+    purpose: Risk-reduction spike tasks.
+    n_a_record_required: true
+  n_a_record:
+    required: true
+    required_fields:
+    - artifact
+    - why_not_applicable
+    - revisit_if
+    - source_basis
+context_updates:
+  files_to_update:
+  - path: /workflow/context/context_packet.md
+    condition: Finalizer always updates or prepares this for the next stage.
+    update_rule: Include only the minimum operational context needed by Stage 10.
+  - path: /workflow/context/ASSUMPTIONS.md
+    condition: Update if working assumptions remain active.
+    update_rule: Record assumptions without treating them as decisions.
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    condition: Update if unresolved questions may affect task approval, prompt writing, implementation, tests, security, or
+      release.
+    update_rule: Record questions with affected artifacts or stages.
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    condition: Update if task candidates or scope options were explicitly rejected or superseded.
+    update_rule: Do not revive rejected options unless explicitly reopened.
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    condition: Update if Stage 9 task links are introduced or changed.
+    update_rule: Use stable IDs and preserve existing links.
+  context_packet:
+    path: /workflow/context/context_packet.md
+    purpose: Prepare minimal context for Stage 10 Implementation Prompt Writing.
+    next_stage: 10_implementation_prompt_writing
+    required_sections:
+    - Current Project State
+    - Approved Decisions
+    - Working Assumptions
+    - Open Questions
+    - Rejected / Superseded Options
+    - Constraints That Must Not Be Violated
+    - Key Context for Next Stage
+    - Required Inputs for Next Stage
+    - Do Not Do
+traceability:
+  id_conventions:
+    requirements: REQ-001, REQ-002
+    tasks: TASK-001, TASK-002
+    assumptions: A-001, A-002
+    questions: Q-001, Q-002
+    risks: R-001, R-002
+  required_links:
+  - Requirement → Acceptance Criteria → Release Slice → Task
+  - Requirement → Acceptance Criteria → Test / Validation Method → Task
+  - Domain Rule / Invariant → Required Test → Task, if applicable
+  - Architecture Component / API Contract → Task, if applicable
+  - Data Artifact / Security Rule → Task, if applicable
+  - Task → Future Implementation Prompt Placeholder
+  - Task → Future Implementation Evidence Placeholder
+  prohibited_links:
+  - Out-of-scope item → Task
+  - Rejected option → Task
+  - Unapproved draft requirement → Task as if approved
+  - Internal sub-skill output → Downstream source of truth
+classification_rules:
+  approved_decision:
+    rule: Only explicit human approval can create an approved decision.
+    examples:
+    - Approved task inventory
+    - Approved task dependency order
+  decision_candidate:
+    rule: Agent recommendations awaiting human approval must be marked as decision candidates.
+  working_assumption:
+    rule: Temporary beliefs needed for progress must remain assumptions until confirmed.
+  open_question:
+    rule: Unresolved issues that may affect later work must be recorded as open questions.
+  rejected_option:
+    rule: Explicitly rejected or superseded options must be recorded and not revived unless reopened.
+  recommendation:
+    rule: Recommendations are not decisions and must not be recorded as approved.
+approval_gate:
+  required: true
+  decisions_to_approve:
+  - Task inventory
+  - Task card set
+  - Task dependency order
+  - Task sizing and split decisions
+  - Enabling tasks
+  - Risk-reduction spikes
+  - Deferred tasks
+  - Definition of done for each task
+  - Stage 10 prompt writing order
+  assumptions_to_confirm:
+  - Task boundary assumptions
+  - Implementation order assumptions
+  - Missing input workarounds
+  - Inferred file or module ownership
+  - Inferred validation methods
+  open_questions_to_resolve:
+  - Requirements without clear implementation path
+  - Tasks blocked by architecture, data, or test ambiguity
+  - Tasks requiring human scope judgment
+  - Tasks requiring technology or library confirmation
+  risks_to_review:
+  - Large or cross-cutting tasks
+  - Security/privacy-sensitive tasks
+  - Migration-sensitive tasks
+  - Integration-sensitive tasks
+  - Tasks with unclear rollback
+  - Tasks with weak validation evidence
+  artifacts_ready_for_review:
+  - /workflow/09_tasks/09_task_inventory.md
+  - /workflow/09_tasks/09_task_cards.md
+  - /workflow/09_tasks/09_dependency_order.md
+  - /workflow/09_tasks/09_traceability_matrix.md
+  - /workflow/09_tasks/result.md
+validation:
+  checklist:
+  - Required approved inputs were checked.
+  - Missing or draft inputs were reported.
+  - Out-of-scope items were not converted into tasks.
+  - Every must-have requirement has at least one task or a recorded coverage gap.
+  - Every task has a stable task ID.
+  - Every task has required tests or manual validation.
+  - Every task has definition of done.
+  - Task order respects dependencies.
+  - Traceability matrix has been updated.
+  - Human approval gate is explicit.
+  failure_conditions:
+  - Approved requirements are missing.
+  - Approved MVP or release scope is missing.
+  - Stage 8 validation strategy is missing.
+  - Task decomposition would require scope expansion.
+  - Task IDs are inconsistent across Stage 9 artifacts.
+  - Stage 10 handoff cannot be prepared safely.
+  blocker_report_required: true
+  blocker_report_fields:
+  - blocking_issue
+  - why_it_matters
+  - affected_artifacts_or_stages
+  - safe_partial_work_completed
+  - human_decision_needed
+prohibited_actions:
+- Execute implementation work.
+- Write Stage 10 implementation prompts.
+- Create project artifacts while installing this reusable skill package.
+- Create tasks for out-of-scope or rejected items.
+- Treat draft task cards as approved.
+- Update DECISIONS.md without explicit human approval.
+- Make downstream stages depend on internal sub-skill paths.
+specialization_hooks:
+  allowed: true
+  examples:
+  - name: web_saas
+    may_add:
+    - frontend/backend/API coordination tasks
+    - auth/session/role-based access tasks
+    - deployment environment task grouping
+    - observability tasks
+  - name: internal_tool
+    may_add:
+    - operator workflow tasks
+    - admin control tasks
+    - audit and manual override tasks
+  - name: mobile_app
+    may_add:
+    - platform-specific tasks
+    - offline/sync sequencing
+    - device permission tasks
+  - name: ai_data_product
+    may_add:
+    - dataset preparation tasks
+    - model evaluation tasks
+    - reproducibility tasks
+    - human review tasks
+  - name: regulated_security_sensitive
+    may_add:
+    - compliance evidence tasks
+    - audit logging tasks
+    - privacy review tasks
+    - threat mitigation tasks
+  - name: brownfield_legacy
+    may_add:
+    - codebase discovery tasks
+    - compatibility tasks
+    - regression protection tasks
+    - incremental refactor tasks
+  must_not_change:
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries
+tool_wrapper_hooks:
+  allowed:
+  - file_creation_commands
+  - save_locations
+  - sandbox_rules
+  - review_workflow
+  - command_invocation_conventions
+  must_not_change:
+  - stage_reasoning
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries
+

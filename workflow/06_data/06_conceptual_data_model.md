@@ -1,0 +1,1 @@
+# Artifact: 06 Conceptual Data Model

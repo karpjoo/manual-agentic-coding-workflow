@@ -1,0 +1,465 @@
+contract_version: 1.0.0
+skill:
+  name: 08_test_strategy_validation
+  stage: 08 Test Strategy & Validation Harness
+  title: Test Strategy & Validation Harness
+  skill_path: /skills/08_test_strategy_validation/SKILL.md
+  readme_path: /skills/08_test_strategy_validation/README.md
+  primary_output: /workflow/08_test_strategy/result.md
+  requires_human_approval: true
+  internal_split: true
+  public_interface: true
+purpose:
+  summary: Define the project validation strategy, acceptance tests, validation commands, manual test plan, and Stage 9 handoff before implementation begins.
+  core_question: How will approved MVP requirements and acceptance criteria be validated, with traceable automated and manual evidence, before task breakdown begins?
+stage_contract:
+  public_interface: true
+  downstream_depends_on:
+  - approved_stage_artifacts
+  downstream_must_not_depend_on:
+  - internal_subskill_outputs
+  - subskill_folder_names
+  - prompt_history
+  - unapproved_drafts
+  previous_stage: 07_mvp_release_slicing
+  next_stage: 09_task_breakdown
+  finalizer_required: true
+  finalizer_skill: /skills/08_test_strategy_validation/08e_test_strategy_finalizer/SKILL.md
+subskills:
+  execution_order:
+  - id: 08a
+    name: validation_scope_strategy
+    path: /skills/08_test_strategy_validation/08a_validation_scope_strategy/SKILL.md
+    primary_output: /workflow/08_test_strategy/08_test_strategy.md
+  - id: 08b
+    name: acceptance_test_design
+    path: /skills/08_test_strategy_validation/08b_acceptance_test_design/SKILL.md
+    primary_output: /workflow/08_test_strategy/08_acceptance_tests.md
+  - id: 08c
+    name: validation_commands_harness
+    path: /skills/08_test_strategy_validation/08c_validation_commands_harness/SKILL.md
+    primary_output: /workflow/08_test_strategy/08_validation_commands.md
+  - id: 08d
+    name: manual_specialized_validation
+    path: /skills/08_test_strategy_validation/08d_manual_specialized_validation/SKILL.md
+    primary_output: /workflow/08_test_strategy/08_manual_test_plan.md
+  - id: 08e
+    name: test_strategy_finalizer
+    path: /skills/08_test_strategy_validation/08e_test_strategy_finalizer/SKILL.md
+    primary_output: /workflow/08_test_strategy/result.md
+input_contract:
+  always_read:
+  - path: /workflow/context/artifact_manifest.yml
+    required: true
+    purpose: Verify artifact status, approval state, and supersession.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/context_packet.md
+    required: true
+    purpose: Read the current operational context and next-stage expectations.
+    source_of_truth: false
+    approval_required: false
+  - path: /workflow/context/DECISIONS.md
+    required: true
+    purpose: Use only human-approved decisions as decisions.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/ASSUMPTIONS.md
+    required: false
+    purpose: Identify active working assumptions affecting validation.
+    source_of_truth: false
+    approval_required: false
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    required: false
+    purpose: Identify unresolved issues affecting validation scope.
+    source_of_truth: false
+    approval_required: false
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    required: false
+    purpose: Avoid reviving rejected validation or scope options.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    required: true
+    purpose: Preserve and extend links from requirements to tests and validation evidence.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/APPROVAL_LOG.md
+    required: false
+    purpose: Confirm explicit human approvals when available.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/03_requirements/03_requirements.md
+    required: true
+    purpose: Source approved requirements for validation planning.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/03_requirements/03_acceptance_criteria.md
+    required: true
+    purpose: Source acceptance criteria for acceptance tests.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/05_architecture/05_architecture_plan.md
+    required: true
+    purpose: Source architecture boundaries and validation constraints.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/07_mvp_release/07_mvp_scope.md
+    required: true
+    purpose: Source MVP validation scope and exclusions.
+    source_of_truth: true
+    approval_required: true
+  read_if_applicable:
+  - path: /workflow/00_intake/00_existing_context_review.md
+    condition: Project is brownfield, migration, extension, or existing-codebase work.
+    purpose: Define regression baseline and compatibility validation.
+  - path: /workflow/02_stakeholders_risk/02_risk_privacy_screening.md
+    condition: Roles, permissions, sensitive data, privacy, compliance, abuse, or operational risk affects validation.
+    purpose: Add security, privacy, and risk-based validation coverage.
+  - path: /workflow/04_domain/04_business_rules_invariants.md
+    condition: Domain invariants, lifecycle rules, or state transitions exist.
+    purpose: Map business rules to unit, scenario, or acceptance tests.
+  - path: /workflow/04_domain/04_domain_events.md
+    condition: Domain events or asynchronous workflows exist.
+    purpose: Plan event, notification, and integration validation.
+  - path: /workflow/05_architecture/05_api_contracts.md
+    condition: APIs exist.
+    purpose: Plan API contract and integration tests.
+  - path: /workflow/05_architecture/05_integration_contracts.md
+    condition: External systems, queues, webhooks, third-party services, or LLM/model APIs exist.
+    purpose: Plan boundary, mock, stub, and external dependency validation.
+  - path: /workflow/05_architecture/05_module_boundaries.md
+    condition: Module-level or boundary validation is needed.
+    purpose: Plan module and contract tests.
+  - path: /workflow/06_data/06_conceptual_data_model.md
+    condition: Persistent data exists.
+    purpose: Plan data correctness validation.
+  - path: /workflow/06_data/06_logical_schema.md
+    condition: Persistent data exists.
+    purpose: Plan schema-level and relationship validation.
+  - path: /workflow/06_data/06_physical_schema.md
+    condition: Physical persistence details affect validation.
+    purpose: Plan environment-specific validation.
+  - path: /workflow/06_data/06_indexes.md
+    condition: Query performance, filtering, ordering, pagination, or index behavior must be validated.
+    purpose: Plan performance and query validation.
+  - path: /workflow/06_data/06_migration_plan.md
+    condition: Migration, seed data, rollback, or backfill validation is needed.
+    purpose: Plan migration validation.
+  - path: /workflow/06_data/06_data_security_rules.md
+    condition: Data access control or tenant isolation exists.
+    purpose: Plan data security and authorization validation.
+  - path: /workflow/07_mvp_release/07_release_slices.md
+    condition: Validation differs by release slice.
+    purpose: Align validation with release order.
+  - path: /workflow/07_mvp_release/07_out_of_scope.md
+    condition: MVP validation scope must explicitly exclude later or non-scope behavior.
+    purpose: Prevent scope creep in test planning.
+  do_not_read_by_default:
+  - path_or_pattern: full historical agent logs
+    reason: Prompt history is not a source of truth.
+  - path_or_pattern: superseded artifacts
+    reason: Superseded artifacts must not define current validation scope.
+  - path_or_pattern: rejected artifacts
+    reason: Rejected options must not be revived unless reopened.
+  - path_or_pattern: /workflow/10_prompts/**
+    reason: Implementation prompts are downstream of Stage 8.
+  - path_or_pattern: /workflow/11_implementation_results/**
+    reason: Implementation evidence does not exist before task breakdown in normal flow.
+  - path_or_pattern: /workflow/12_review_release_handoff/**
+    reason: Release review is downstream of implementation.
+  - path_or_pattern: full source code tree
+    reason: Do not inspect implementation files unless brownfield validation baseline is explicitly in scope.
+  missing_input_handling:
+    missing_required_input: Report the missing input, explain why it matters, classify it as blocking or non-blocking, and stop if validation scope would be unsafe.
+    missing_stage_input: Create safe partial outputs only when assumptions are clearly labeled and do not affect critical validation coverage.
+    no_project_context: Stop and request project context instead of inventing requirements, architecture, or MVP scope.
+    conflicting_inputs: Report conflicting sources and stop if the conflict affects scope, security, privacy, architecture, data, or validation coverage.
+    draft_or_unapproved_inputs: Use only as draft context when explicitly allowed; do not treat as source of truth.
+user_directives:
+  path: /workflow/08_test_strategy/USER_DIRECTIVES.md
+  required_if_exists: true
+  handling_rules:
+  - Read before executing the SKILL or any sub-SKILL.
+  - Classify directives as approval, correction, preference, rejection, scope change, constraint, question, or new input.
+  - Do not treat every directive as a globally approved decision.
+  - Report conflicts with approved decisions.
+  - Do not modify USER_DIRECTIVES.md unless explicitly instructed.
+output_contract:
+  official_stage_artifacts:
+  - path: /workflow/08_test_strategy/08_test_strategy.md
+    purpose: Validation strategy, test levels, MVP validation scope, risk priorities, fixture strategy, and validation gaps.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+  - path: /workflow/08_test_strategy/08_acceptance_tests.md
+    purpose: Acceptance test specifications mapped to acceptance criteria.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+  - path: /workflow/08_test_strategy/08_validation_commands.md
+    purpose: Validation command inventory, placeholders, environment needs, and CI applicability.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+  - path: /workflow/08_test_strategy/08_manual_test_plan.md
+    purpose: Manual validation plan and pass/fail criteria.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+  - path: /workflow/08_test_strategy/result.md
+    purpose: Final Stage 8 summary, coverage summary, decisions, assumptions, gaps, and approval gate.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    purpose: Traceability from requirements and acceptance criteria to tests, commands, manual checks, and validation gaps.
+    required: true
+    approval_required: false
+  - path: /workflow/context/context_packet.md
+    purpose: Minimal operational context for Stage 9 Task Breakdown.
+    required: true
+    approval_required: false
+  conditional_artifacts:
+  - path: /workflow/08_test_strategy/08_test_data_fixtures.md
+    condition: Fixture, persona, seed data, mock, or data reset planning is needed.
+    purpose: Define test data and fixture strategy.
+    n_a_record_required: true
+  - path: /workflow/08_test_strategy/08_ci_validation_plan.md
+    condition: CI validation is expected or needs planning.
+    purpose: Define CI validation scope, commands, and blockers.
+    n_a_record_required: true
+  - path: /workflow/08_test_strategy/08_security_privacy_tests.md
+    condition: Authentication, authorization, privacy, audit, sensitive data, tenant isolation, abuse, or compliance validation is needed.
+    purpose: Define security and privacy validation tests.
+    n_a_record_required: true
+  - path: /workflow/08_test_strategy/08_performance_validation.md
+    condition: Performance, latency, scalability, query efficiency, or resource usage is a requirement or risk.
+    purpose: Define performance validation plan.
+    n_a_record_required: true
+  - path: /workflow/08_test_strategy/08_accessibility_validation.md
+    condition: User-facing UI accessibility is required or operationally important.
+    purpose: Define accessibility validation plan.
+    n_a_record_required: true
+  - path: /workflow/08_test_strategy/08_regression_baseline.md
+    condition: Project modifies or extends an existing system.
+    purpose: Define brownfield regression baseline.
+    n_a_record_required: true
+  - path: /workflow/08_test_strategy/08_model_or_data_evaluation_plan.md
+    condition: Project is an AI/data product or model/data validation is required.
+    purpose: Define model, data, benchmark, reproducibility, and human review validation.
+    n_a_record_required: true
+  - path: /workflow/08_test_strategy/08_mobile_platform_validation.md
+    condition: Project is a mobile app or platform-specific device validation is needed.
+    purpose: Define mobile platform validation plan.
+    n_a_record_required: true
+  n_a_record:
+    required: true
+    required_fields:
+    - artifact
+    - why_not_applicable
+    - revisit_if
+    - related_requirement_or_decision
+context_updates:
+  files_to_update:
+  - path: /workflow/context/context_packet.md
+    condition: Finalizer always updates or prepares it for Stage 9.
+    update_rule: Include only minimum operational context needed by Stage 9.
+  - path: /workflow/context/ASSUMPTIONS.md
+    condition: Update if working assumptions exist.
+    update_rule: Record assumptions without treating them as decisions.
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    condition: Update if unresolved questions exist.
+    update_rule: Record questions that may affect task breakdown, implementation prompts, or validation.
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    condition: Update if validation options were rejected or superseded.
+    update_rule: Do not revive rejected options unless explicitly reopened.
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    condition: Update when test, command, manual test, or gap links are introduced or changed.
+    update_rule: Use stable IDs and preserve existing links.
+  context_packet:
+    path: /workflow/context/context_packet.md
+    purpose: Prepare minimal context for Stage 9 Task Breakdown.
+    next_stage: 09_task_breakdown
+    required_sections:
+    - Current Project State
+    - Approved Decisions
+    - Working Assumptions
+    - Open Questions
+    - Rejected / Superseded Options
+    - Constraints That Must Not Be Violated
+    - Key Context for Next Stage
+    - Required Inputs for Next Stage
+    - Do Not Do
+traceability:
+  id_conventions:
+    requirements: REQ-001, REQ-002
+    acceptance_criteria: AC-001, AC-002
+    acceptance_tests: AT-001, AT-002
+    commands: CMD-001, CMD-002
+    manual_tests: MAN-001, MAN-002
+    fixtures: FX-001, FX-002
+    validation_gaps: VG-001, VG-002
+    risks: R-001, R-002
+  required_links:
+  - Requirement ID -> Acceptance Criteria ID
+  - Acceptance Criteria ID -> Acceptance Test ID
+  - Acceptance Test ID -> Validation Method
+  - Acceptance Test ID -> Command ID or Manual Test ID
+  - Validation Gap ID -> Affected Requirement or Acceptance Criteria
+  - Task ID -> TBD in Stage 9
+  prohibited_links:
+  - Do not invent Stage 9 task IDs.
+  - Do not link implementation evidence before Stage 11 exists.
+  - Do not treat command placeholders as executed evidence.
+classification_rules:
+  approved_decision:
+    rule: Only explicit human approval can create an approved decision.
+    examples:
+    - 'Approved: Stage 8 validation strategy is accepted for Stage 9 handoff.'
+  decision_candidate:
+    rule: Agent recommendations awaiting human approval must be marked as decision candidates.
+  working_assumption:
+    rule: Temporary beliefs needed for progress must remain assumptions until confirmed.
+  open_question:
+    rule: Unresolved issues that may affect validation, task breakdown, implementation, or release must be recorded as open questions.
+  rejected_option:
+    rule: Explicitly rejected or superseded options must be recorded and not revived unless reopened.
+  recommendation:
+    rule: Recommendations are not decisions and must not be recorded as approved.
+approval_gate:
+  required: true
+  decisions_to_approve:
+  - Automated MVP test scope
+  - Manual MVP validation scope
+  - Validation commands or command placeholders
+  - CI validation expectations
+  - Security/privacy validation scope
+  - Performance/accessibility validation scope if applicable
+  - Validation gaps accepted for Stage 9 task breakdown
+  assumptions_to_confirm:
+  - Test data and fixture assumptions
+  - Manual-only validation assumptions
+  - Unknown command/tooling assumptions
+  - Environment and dependency assumptions
+  open_questions_to_resolve:
+  - Questions that affect task card required tests
+  - Questions that affect command feasibility
+  - Questions that affect validation coverage for high-risk behavior
+  risks_to_review:
+  - Requirement coverage gaps
+  - Security/privacy coverage gaps
+  - Manual-only validation risk
+  - CI unavailable or deferred risk
+  - Command placeholder risk
+  artifacts_ready_for_review:
+  - /workflow/08_test_strategy/08_test_strategy.md
+  - /workflow/08_test_strategy/08_acceptance_tests.md
+  - /workflow/08_test_strategy/08_validation_commands.md
+  - /workflow/08_test_strategy/08_manual_test_plan.md
+  - /workflow/08_test_strategy/result.md
+validation:
+  checklist:
+  - Each MVP requirement has at least one validation method or explicit validation gap.
+  - Each acceptance criterion has an acceptance test or documented gap.
+  - Manual tests include concrete pass/fail criteria.
+  - Validation commands distinguish confirmed commands from placeholders.
+  - Security, privacy, authorization, and data-access validation are considered when applicable.
+  - Conditional artifacts are created or have N/A rationale.
+  - Stage 9 required inputs are listed in context_packet.md.
+  failure_conditions:
+  - Missing approved requirements or acceptance criteria.
+  - Missing approved MVP scope.
+  - Conflict between requirements and MVP scope.
+  - Missing security/privacy/data access rules where sensitive data validation is required.
+  - Stage 8 artifacts cannot be reconciled safely.
+  - Human directives conflict with approved decisions.
+  blocker_report_required: true
+  blocker_report_fields:
+  - blocking_issue
+  - why_it_matters
+  - affected_artifacts_or_stages
+  - safe_partial_work_completed
+  - human_decision_needed
+prohibited_actions:
+- Do not execute the SKILL while creating this support file.
+- Do not create project artifacts under /workflow while creating this support file.
+- Do not implement product code or test code in Stage 8.
+- Do not create Stage 9 task cards.
+- Do not claim tests passed without evidence.
+- Do not invent exact commands when tooling is unknown.
+- Do not treat command placeholders as approved commands.
+- Do not update DECISIONS.md without explicit human approval.
+- Do not make downstream stages depend on internal sub-SKILL outputs.
+specialization_hooks:
+  allowed: true
+  examples:
+  - name: web_saas
+    may_add:
+    - browser validation
+    - API validation
+    - auth and tenant-isolation tests
+    - CI concerns
+  - name: internal_tool
+    may_add:
+    - operator workflows
+    - admin/manual checks
+    - organizational constraints
+  - name: mobile_app
+    may_add:
+    - device context
+    - platform constraints
+    - offline/sync validation
+    - app release validation
+  - name: ai_data_product
+    may_add:
+    - data source validation
+    - evaluation metrics
+    - model output review
+    - reproducibility checks
+  - name: regulated_security_sensitive
+    may_add:
+    - compliance validation
+    - audit tests
+    - privacy-sensitive validation
+    - release blockers
+  - name: brownfield_legacy
+    may_add:
+    - regression baseline
+    - compatibility validation
+    - migration validation
+  must_not_change:
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries
+tool_wrapper_hooks:
+  allowed:
+  - file_creation_commands
+  - save_locations
+  - sandbox_rules
+  - review_workflow
+  - command_invocation_conventions
+  must_not_change:
+  - stage_reasoning
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries

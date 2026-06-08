@@ -1,0 +1,539 @@
+contract_version: "1.0.0"
+
+skill:
+  name: "02_stakeholder_risk_framing"
+  stage: "02 - Stakeholder & Risk Framing"
+  title: "Stakeholder & Risk Framing"
+  skill_path: "/skills/02_stakeholder_risk_framing/SKILL.md"
+  readme_path: "/skills/02_stakeholder_risk_framing/README.md"
+  contract_path: "/skills/02_stakeholder_risk_framing/artifact_contract.md"
+  primary_output: "/workflow/02_stakeholders_risk/02_stakeholders.md"
+  stage_result_artifact: "/workflow/02_stakeholders_risk/result.md"
+  previous_stage: "01_service_goal_definition"
+  next_stage: "03_requirements_acceptance"
+  requires_human_approval: true
+
+purpose:
+  summary: "Identify stakeholders, roles, permissions, data exposure, external transfers, admin powers, audit needs, and early security/privacy risks before requirements are written."
+  core_question: "Who or what can affect or be affected by the system, and what role, permission, data, privacy, security, operational, compliance, or external-transfer risks must be considered before writing requirements?"
+
+input_contract:
+  always_read:
+    - path: "/workflow/context/artifact_manifest.yml"
+      required: true
+      purpose: "Check artifact existence, status, approval, and supersession."
+      source_of_truth: true
+      approval_required: false
+    - path: "/workflow/context/context_packet.md"
+      required: true
+      purpose: "Read the minimal operational context handed off from prior stages."
+      source_of_truth: false
+      approval_required: false
+    - path: "/workflow/context/DECISIONS.md"
+      required: true
+      purpose: "Use only human-approved decisions as source of truth."
+      source_of_truth: true
+      approval_required: false
+    - path: "/workflow/context/ASSUMPTIONS.md"
+      required: true
+      purpose: "Read active working assumptions that may affect stakeholder and risk framing."
+      source_of_truth: false
+      approval_required: false
+    - path: "/workflow/context/OPEN_QUESTIONS.md"
+      required: true
+      purpose: "Identify unresolved questions that may affect this stage."
+      source_of_truth: false
+      approval_required: false
+    - path: "/workflow/context/REJECTED_OPTIONS.md"
+      required: true
+      purpose: "Avoid reviving rejected or superseded stakeholder, role, data, or risk options."
+      source_of_truth: true
+      approval_required: false
+    - path: "/workflow/context/APPROVAL_LOG.md"
+      required: true
+      purpose: "Verify explicit approvals when available."
+      source_of_truth: true
+      approval_required: false
+    - path: "/workflow/00_intake/00_project_intake.md"
+      required: true
+      purpose: "Understand project type, fixed constraints, and initial context."
+      source_of_truth: true
+      approval_required: true
+    - path: "/workflow/01_goal/01_service_goal.md"
+      required: true
+      purpose: "Use the service goal as the main basis for stakeholder and risk framing."
+      source_of_truth: true
+      approval_required: true
+
+  read_if_applicable:
+    - path: "/workflow/00_intake/00_existing_context_review.md"
+      condition: "Project is brownfield, legacy, migration, or integration-heavy."
+      purpose: "Capture existing roles, permissions, data exposure, integrations, and forbidden change areas."
+    - path: "/workflow/00_intake/review_notes.md"
+      condition: "Stage 0 review notes or corrections exist."
+      purpose: "Apply human corrections or constraints from intake review."
+    - path: "/workflow/01_goal/review_notes.md"
+      condition: "Stage 1 review notes or goal changes exist."
+      purpose: "Apply human corrections or constraints from goal review."
+    - path: "/workflow/02_stakeholders_risk/USER_DIRECTIVES.md"
+      condition: "Stage-local human instructions exist."
+      purpose: "Apply explicit Stage 2 directives before agent assumptions."
+    - path: "/workflow_templates/specializations/web_saas.md"
+      condition: "Project profile includes web SaaS or browser-based multi-user service."
+      purpose: "Add tenant, account, session, analytics, billing, and admin-role concerns."
+    - path: "/workflow_templates/specializations/internal_tool.md"
+      condition: "Project is an internal staff, operations, admin, or back-office tool."
+      purpose: "Add staff roles, operational overrides, internal access, and auditability concerns."
+    - path: "/workflow_templates/specializations/mobile_app.md"
+      condition: "Project includes mobile app, device permissions, local storage, push, or offline/sync."
+      purpose: "Add platform, device, local data, notification, and sync exposure concerns."
+    - path: "/workflow_templates/specializations/ai_data_product.md"
+      condition: "Project uses AI/ML/LLM, datasets, labeling, model outputs, or synthetic data."
+      purpose: "Add dataset subject, provenance, model input/output, LLM transfer, and misuse concerns."
+    - path: "/workflow_templates/specializations/regulated_security_sensitive.md"
+      condition: "Project is regulated, privacy-sensitive, safety-sensitive, or security-sensitive."
+      purpose: "Add compliance, audit, retention, deletion, and high-severity blocker concerns."
+    - path: "/workflow_templates/specializations/brownfield_legacy.md"
+      condition: "Project modifies or integrates with an existing system."
+      purpose: "Add inherited constraints, compatibility, existing roles, and forbidden-change concerns."
+
+  do_not_read_by_default:
+    - path_or_pattern: "raw chat history or full agent logs"
+      reason: "Not an approved source of truth and likely too noisy."
+    - path_or_pattern: "superseded or rejected artifacts"
+      reason: "Must not be reused as current truth unless checking why rejected."
+    - path_or_pattern: "/workflow/03_requirements/**"
+      reason: "Stage 3 artifacts should not drive Stage 2 unless explicitly requested."
+    - path_or_pattern: "/workflow/04_domain/**"
+      reason: "Domain modeling belongs to a later stage."
+    - path_or_pattern: "/workflow/05_architecture/**"
+      reason: "Architecture belongs to a later stage."
+    - path_or_pattern: "/workflow/06_data/**"
+      reason: "Data design belongs to a later stage."
+    - path_or_pattern: "source code"
+      reason: "Not needed for greenfield Stage 2 unless brownfield review requires it."
+
+  missing_input_handling:
+    missing_required_input: "Report the missing input in result.md, explain impact, mark blocking or non-blocking, and stop if safe progress is impossible."
+    missing_stage_input: "If /workflow/01_goal/01_service_goal.md or service goal direction is missing, produce a Blocker Report and do not create final Stage 2 artifacts."
+    no_project_context: "If project type is unknown and it materially affects stakeholder, privacy, security, regulation, or transfer scope, request human decision before proceeding."
+    conflicting_inputs: "Report conflicting sources and stop if the conflict affects scope, roles, permissions, data, external transfer, security, privacy, compliance, or Stage 3 requirements."
+    draft_or_unapproved_inputs: "Use only as draft context; do not treat unapproved content as approved decisions."
+
+user_directives:
+  path: "/workflow/02_stakeholders_risk/USER_DIRECTIVES.md"
+  required_if_exists: true
+  handling_rules:
+    - "Read before executing the SKILL."
+    - "Classify directives as approval, correction, preference, new requirement, rejection, scope change, constraint, question, or new input."
+    - "Apply directives before agent assumptions."
+    - "Do not treat every directive as a globally approved decision."
+    - "Report conflicts with approved decisions."
+    - "Do not modify USER_DIRECTIVES.md unless explicitly instructed."
+
+output_contract:
+  mandatory_artifacts:
+    - path: "/workflow/02_stakeholders_risk/02_stakeholders.md"
+      purpose: "Record stakeholder categories, role candidates, privileged actor candidates, external system stakeholders, affected non-users, decision candidates, assumptions, open questions, and Stage 3 implications."
+      required: true
+      approval_required: true
+      status_values: ["Draft", "Approved", "Needs Review"]
+      required_sections:
+        - "Source Inputs"
+        - "Stakeholder Overview"
+        - "Stakeholder Register"
+        - "User Role Candidates"
+        - "Administrator / Privileged Actor Candidates"
+        - "External System Stakeholders"
+        - "Affected Non-User Stakeholders"
+        - "Decision Candidates"
+        - "Working Assumptions"
+        - "Open Questions"
+        - "Requirements Implications for Stage 3"
+    - path: "/workflow/02_stakeholders_risk/02_risk_privacy_screening.md"
+      purpose: "Record data categories, external transfer exposure, initial security/privacy risks, admin abuse risk, audit/accountability needs, compliance concerns, and Stage 3 implications."
+      required: true
+      approval_required: true
+      status_values: ["Draft", "Approved", "Needs Review"]
+      required_sections:
+        - "Source Inputs"
+        - "Screening Summary"
+        - "Data Category Register"
+        - "External Transfer / LLM/API Exposure Register"
+        - "Initial Security Risk Register"
+        - "Initial Privacy Risk Register"
+        - "Admin Power and Abuse Risk Notes"
+        - "Audit / Accountability Needs"
+        - "Compliance or Policy Concerns"
+        - "Decision Candidates"
+        - "Working Assumptions"
+        - "Open Questions"
+        - "Requirements Implications for Stage 3"
+    - path: "/workflow/02_stakeholders_risk/result.md"
+      purpose: "Summarize execution, inputs, outputs, findings, assumptions, open questions, risks, N/A records, traceability updates, and human approval needs."
+      required: true
+      approval_required: true
+      status_values: ["Draft", "Approved", "Needs Review"]
+      required_sections:
+        - "Task Summary"
+        - "Inputs Used"
+        - "Outputs Created or Updated"
+        - "Key Findings"
+        - "Decision Candidates"
+        - "Working Assumptions"
+        - "Open Questions"
+        - "Risks and Constraints"
+        - "Rejected or Superseded Options"
+        - "Traceability Updates"
+        - "N/A Records"
+        - "Human Approval Required"
+        - "Recommended Next Step"
+    - path: "/workflow/context/context_packet.md"
+      purpose: "Prepare minimal operational context for Stage 3 Requirements & Acceptance Criteria."
+      required: true
+      approval_required: false
+      status_values: ["Draft", "Approved", "Needs Review"]
+      required_sections:
+        - "Current Project State"
+        - "Approved Decisions"
+        - "Working Assumptions"
+        - "Open Questions"
+        - "Rejected / Superseded Options"
+        - "Constraints That Must Not Be Violated"
+        - "Key Context for Next Stage"
+        - "Required Inputs for Next Stage"
+        - "Do Not Do"
+
+  conditional_artifacts:
+    - path: "/workflow/02_stakeholders_risk/02_role_permission_matrix.md"
+      condition: "Multiple roles, permission levels, reviewers, admins, operators, or access boundaries exist."
+      purpose: "Record role candidates, permission directions, forbidden actions, sensitive operations, and audit needs."
+      n_a_record_required: true
+      required_sections:
+        - "Role Candidates"
+        - "Permission Directions"
+        - "Forbidden Actions"
+        - "Sensitive Operations"
+        - "Decision Candidates"
+        - "Open Questions"
+    - path: "/workflow/02_stakeholders_risk/02_data_exposure_map.md"
+      condition: "Personal, sensitive, confidential, regulated, logged, uploaded, model, dataset, or externally visible data exists."
+      purpose: "Map data categories to subjects, actors, access, storage, transfer, retention, and risk."
+      n_a_record_required: true
+      required_sections:
+        - "Data Categories"
+        - "Data Subjects"
+        - "Access / Exposure"
+        - "Storage / Logging"
+        - "Transfer / Export"
+        - "Risks"
+    - path: "/workflow/02_stakeholders_risk/02_external_transfer_register.md"
+      condition: "Data may leave the system through external APIs, LLMs, analytics, monitoring, email/SMS/push, payment, cloud, or vendors."
+      purpose: "Record external service, purpose, data sent/received, sensitivity, retention, consent/redaction, risk level, and approval needs."
+      n_a_record_required: true
+      required_sections:
+        - "External Transfers"
+        - "Data Sent"
+        - "Data Received"
+        - "Sensitivity"
+        - "Retention / Redaction"
+        - "Decision Needed"
+    - path: "/workflow/02_stakeholders_risk/02_admin_power_review.md"
+      condition: "Admin, support, moderator, operator, reviewer, or privileged powers exist."
+      purpose: "Review elevated powers, risk, reversibility, approval, and audit requirements."
+      n_a_record_required: true
+      required_sections:
+        - "Privileged Actors"
+        - "Privileged Powers"
+        - "Risk"
+        - "Reversibility"
+        - "Audit Required"
+        - "Recommended Constraints"
+    - path: "/workflow/02_stakeholders_risk/02_audit_accountability_needs.md"
+      condition: "Actions require traceability, accountability, reversibility, moderation, approval, or forensic review."
+      purpose: "Record audit-worthy actions, actors, affected data, candidate log fields, retention, and access rules."
+      n_a_record_required: true
+      required_sections:
+        - "Auditable Actions"
+        - "Actors"
+        - "Affected Objects / Data"
+        - "Candidate Log Fields"
+        - "Retention Concern"
+        - "Log Access"
+    - path: "/workflow/02_stakeholders_risk/02_compliance_risk_notes.md"
+      condition: "Regulatory, legal, institutional, contractual, privacy, security, research, or policy obligations may apply."
+      purpose: "Record possible compliance constraints and questions without inventing legal conclusions."
+      n_a_record_required: true
+      required_sections:
+        - "Possible Compliance Areas"
+        - "Known Constraints"
+        - "Open Questions"
+        - "Risk Notes"
+        - "Approval Needed"
+    - path: "/workflow/02_stakeholders_risk/02_abuse_misuse_cases.md"
+      condition: "The system has meaningful abuse, misuse, fraud, scraping, privilege abuse, prompt injection, or data exfiltration scenarios."
+      purpose: "Record early abuse/misuse cases and implications for requirements."
+      n_a_record_required: true
+      required_sections:
+        - "Misuse Actors"
+        - "Abuse / Misuse Cases"
+        - "Impacted Data / Stakeholders"
+        - "Early Mitigation Direction"
+        - "Stage 3 Implications"
+
+  n_a_record:
+    required: true
+    location: "/workflow/02_stakeholders_risk/result.md"
+    required_fields:
+      - "artifact"
+      - "why_not_applicable"
+      - "evidence_or_input_used"
+      - "revisit_if"
+      - "impact_on_later_stages"
+
+context_updates:
+  files_to_update:
+    - path: "/workflow/context/context_packet.md"
+      condition: "Always update or prepare for Stage 3."
+      update_rule: "Include only the minimum operational context needed by Stage 3."
+    - path: "/workflow/context/ASSUMPTIONS.md"
+      condition: "Update if working assumptions exist."
+      update_rule: "Record assumptions without treating them as decisions."
+    - path: "/workflow/context/OPEN_QUESTIONS.md"
+      condition: "Update if unresolved questions exist."
+      update_rule: "Record questions that may affect requirements, security/privacy, domain rules, architecture, or data design."
+    - path: "/workflow/context/REJECTED_OPTIONS.md"
+      condition: "Update if stakeholder, role, data-flow, transfer, or risk options were explicitly rejected or superseded."
+      update_rule: "Do not revive rejected options unless explicitly reopened."
+    - path: "/workflow/context/TRACEABILITY_MATRIX.md"
+      condition: "Update if traceability links are introduced or changed."
+      update_rule: "Use stable IDs and preserve existing links."
+
+  context_packet:
+    path: "/workflow/context/context_packet.md"
+    purpose: "Prepare minimal context for Stage 3 Requirements & Acceptance Criteria."
+    next_stage: "03_requirements_acceptance"
+    required_sections:
+      - "Current Project State"
+      - "Approved Decisions"
+      - "Working Assumptions"
+      - "Open Questions"
+      - "Rejected / Superseded Options"
+      - "Constraints That Must Not Be Violated"
+      - "Key Context for Next Stage"
+      - "Required Inputs for Next Stage"
+      - "Do Not Do"
+    required_next_stage_inputs:
+      - "/workflow/01_goal/01_service_goal.md"
+      - "/workflow/02_stakeholders_risk/02_stakeholders.md"
+      - "/workflow/02_stakeholders_risk/02_risk_privacy_screening.md"
+      - "Conditional Stage 2 artifacts actually created"
+      - "/workflow/context/DECISIONS.md"
+      - "/workflow/context/ASSUMPTIONS.md"
+      - "/workflow/context/OPEN_QUESTIONS.md"
+      - "/workflow/context/REJECTED_OPTIONS.md"
+
+traceability:
+  id_conventions:
+    stakeholders: "STK-001, STK-002"
+    roles: "ROLE-001, ROLE-002"
+    data_categories: "DATA-001, DATA-002"
+    external_transfers: "EXT-001, EXT-002"
+    risks: "RISK-001, RISK-002"
+    audit_needs: "AUD-001, AUD-002"
+    assumptions: "A-001, A-002"
+    questions: "Q-001, Q-002"
+  required_links:
+    - "Service Goal -> Stakeholder"
+    - "Service Goal -> Role Candidate"
+    - "Stakeholder -> Data Category"
+    - "Role Candidate -> Permission Concern"
+    - "Data Category -> Privacy/Security Risk"
+    - "External Transfer -> Privacy/Security Risk"
+    - "Admin Power -> Audit Need"
+    - "Risk -> Requirements Implication for Stage 3"
+  prohibited_links:
+    - "Detailed requirement IDs unless Stage 3 already defines them"
+    - "Task IDs before Stage 9"
+    - "Test IDs before Stage 8 unless explicitly provided"
+    - "Architecture component IDs before Stage 5 unless already approved"
+
+classification_rules:
+  approved_decision:
+    rule: "Only explicit human approval can create an approved decision."
+    examples:
+      - "Approved: Stage 3 must include Admin, Reviewer, and Viewer roles."
+      - "Approved: External LLM transfer is not allowed for personal data."
+  decision_candidate:
+    rule: "Agent recommendations awaiting human approval must be marked as decision candidates."
+    examples:
+      - "Candidate: Require audit logs for role changes and data export."
+  working_assumption:
+    rule: "Temporary beliefs needed for progress must remain assumptions until confirmed."
+    examples:
+      - "Assumption: The MVP has one administrator role unless the human developer defines more roles."
+  open_question:
+    rule: "Unresolved issues that may affect later work must be recorded as open questions."
+    examples:
+      - "Open Question: Can user-generated content be sent to external LLM providers?"
+  rejected_option:
+    rule: "Explicitly rejected or superseded options must be recorded and not revived unless reopened."
+    examples:
+      - "Rejected: Do not include public self-service user accounts in the MVP."
+  recommendation:
+    rule: "Recommendations are not decisions and must not be recorded as approved."
+
+approval_gate:
+  required: true
+  decisions_to_approve:
+    - "Stakeholder categories to carry into requirements"
+    - "User role and permission direction"
+    - "Administrator/operator power direction"
+    - "Personal or sensitive data handling direction"
+    - "External API/LLM/third-party transfer direction"
+    - "Audit and accountability direction"
+    - "Initial risk assumptions that should constrain Stage 3"
+  assumptions_to_confirm:
+    - "Stakeholder assumptions"
+    - "Role and permission assumptions"
+    - "Data handling assumptions"
+    - "External transfer assumptions"
+    - "Audit and risk assumptions"
+  open_questions_to_resolve:
+    - "Questions that block or materially affect Stage 3 requirements"
+    - "Questions about sensitive data, external transfer, privileged powers, or compliance"
+  risks_to_review:
+    - "High-severity security, privacy, abuse, compliance, or operational risks"
+    - "Risks requiring Stage 3 constraints or acceptance criteria"
+  artifacts_ready_for_review:
+    - "/workflow/02_stakeholders_risk/02_stakeholders.md"
+    - "/workflow/02_stakeholders_risk/02_risk_privacy_screening.md"
+    - "/workflow/02_stakeholders_risk/result.md"
+    - "Conditional artifacts created in the Stage 2 run"
+
+validation:
+  checklist:
+    - "Stage 0 and Stage 1 inputs reviewed."
+    - "USER_DIRECTIVES.md checked if present."
+    - "Missing, draft, superseded, rejected, or conflicting inputs reported."
+    - "Stakeholders include users, admins/operators, external systems, and affected non-users where applicable."
+    - "Role/permission candidates identified but not treated as final requirements."
+    - "Privileged/admin powers reviewed."
+    - "Personal, sensitive, confidential, regulated, logged, uploaded, model, dataset, or externally transferred data identified or marked N/A."
+    - "External API, LLM, analytics, cloud, email/SMS, payment, third-party, or vendor transfers identified or marked N/A."
+    - "Security, privacy, abuse, operational, audit, and compliance risks screened."
+    - "Risks connected to later-stage implications."
+    - "Decision candidates, assumptions, open questions, and risks separated."
+    - "Conditional artifacts created or N/A records provided."
+    - "Traceability updated or gaps recorded."
+    - "context_packet.md updated for Stage 3."
+    - "Human approval items listed."
+    - "No unapproved candidate recorded as approved decision."
+  failure_conditions:
+    - "Missing /workflow/01_goal/01_service_goal.md."
+    - "Missing or unusable service goal direction."
+    - "Unknown project type materially affects stakeholder, privacy, security, regulatory, or transfer scope."
+    - "USER_DIRECTIVES.md conflicts with approved decisions."
+    - "Rejected or superseded artifact is referenced as current truth."
+  blocker_report_required: true
+  blocker_report_fields:
+    - "blocking_issue"
+    - "why_it_matters"
+    - "affected_artifacts_or_stages"
+    - "safe_partial_work_completed"
+    - "human_decision_needed"
+
+prohibited_actions:
+  - "Do not execute Stage 3 requirements work."
+  - "Do not create architecture, API, domain model, database, test, task, UI, release, or implementation artifacts."
+  - "Do not treat all stakeholders as end users."
+  - "Do not ignore admins, operators, reviewers, external systems, or affected non-users."
+  - "Do not treat proposed roles as approved requirements."
+  - "Do not design detailed RBAC/ABAC implementation."
+  - "Do not ignore logs, analytics, uploads, model inputs/outputs, or external transfers."
+  - "Do not claim no security risk without evidence."
+  - "Do not defer all security/privacy thinking to Stage 12."
+  - "Do not update DECISIONS.md without explicit human approval."
+  - "Do not use context_packet.md as the only source of truth."
+  - "Do not revive rejected options without explicit instruction."
+  - "Do not skip the human approval gate."
+
+specialization_hooks:
+  allowed: true
+  examples:
+    - name: "web_saas"
+      may_add:
+        - "tenant or organization roles"
+        - "account lifecycle concerns"
+        - "billing or admin roles"
+        - "session and analytics exposure"
+        - "conditional artifacts"
+        - "validation concerns"
+    - name: "internal_tool"
+      may_add:
+        - "staff roles"
+        - "operational overrides"
+        - "least privilege constraints"
+        - "auditability concerns"
+    - name: "mobile_app"
+      may_add:
+        - "device permissions"
+        - "local storage"
+        - "push notifications"
+        - "offline or sync exposure"
+        - "platform identity constraints"
+    - name: "ai_data_product"
+      may_add:
+        - "dataset subjects"
+        - "data provenance"
+        - "model input/output"
+        - "LLM/API transfer"
+        - "labeling roles"
+        - "synthetic data"
+        - "model misuse"
+    - name: "regulated_security_sensitive"
+      may_add:
+        - "compliance constraints"
+        - "audit logs"
+        - "retention and deletion concerns"
+        - "legal or institutional review"
+        - "high-severity blockers"
+    - name: "brownfield_legacy"
+      may_add:
+        - "existing roles and permissions"
+        - "existing data exposure"
+        - "inherited constraints"
+        - "forbidden change areas"
+  must_not_change:
+    - "approval_rules"
+    - "artifact_contract"
+    - "assumption_handling"
+    - "traceability_rules"
+    - "stage_boundaries"
+
+tool_wrapper_hooks:
+  allowed:
+    - "file_creation_commands"
+    - "save_locations"
+    - "sandbox_rules"
+    - "review_workflow"
+    - "command_invocation_conventions"
+  must_not_change:
+    - "stage_reasoning"
+    - "approval_rules"
+    - "artifact_contract"
+    - "assumption_handling"
+    - "traceability_rules"
+    - "stage_boundaries"
+
+consistency_check:
+  readme_matches_skill: true
+  mandatory_artifacts_match_skill: true
+  conditional_artifacts_match_skill: true
+  input_rules_match_skill: true
+  missing_input_handling_matches_skill: true
+  human_approval_rules_match_skill: true
+  context_handoff_rules_match_skill: true
+  do_not_do_rules_match_skill: true
+  project_specific_content_introduced: false
+  project_artifacts_created_by_contract: false

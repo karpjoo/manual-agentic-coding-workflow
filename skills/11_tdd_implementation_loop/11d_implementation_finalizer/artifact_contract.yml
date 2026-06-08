@@ -1,0 +1,430 @@
+contract_version: 1.0.0
+skill:
+  name: 11d_implementation_finalizer
+  stage: 11 TDD Implementation Loop
+  title: Implementation Finalizer
+  skill_path: /skills/11_tdd_implementation_loop/11d_implementation_finalizer/SKILL.md
+  readme_path: /skills/11_tdd_implementation_loop/11d_implementation_finalizer/README.md
+  primary_output: /workflow/11_implementation_results/11_task_result_{{TASK_ID}}.md
+  requires_human_approval: true
+  external_visibility: internal
+parent_stage:
+  name: 11_tdd_implementation_loop
+  path: /skills/11_tdd_implementation_loop
+  public_contract: /skills/11_tdd_implementation_loop/artifact_contract.yml
+subskill:
+  id: 11d
+  name: implementation_finalizer
+  skill_path: /skills/11_tdd_implementation_loop/11d_implementation_finalizer/SKILL.md
+  previous_subskill: /skills/11_tdd_implementation_loop/11c_refactor_regression_evidence/SKILL.md
+  next_subskill: /skills/12_review_release_handoff/SKILL.md
+  external_visibility: internal
+  downstream_dependency_allowed: false
+purpose:
+  summary: Consolidates official task result and evidence artifacts, updates traceability, and prepares human review.
+  core_question: Are the result, evidence, traceability, risks, and context handoff complete enough for human review?
+input_contract:
+  always_read:
+  - path: /skills/11_tdd_implementation_loop/SKILL.md
+    required: true
+    purpose: Apply the parent stage contract.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/artifact_manifest.yml
+    required: false
+    purpose: Check artifact status and approval.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/context_packet.md
+    required: true
+    purpose: Read current operational context.
+    source_of_truth: false
+    approval_required: false
+  - path: /workflow/context/DECISIONS.md
+    required: false
+    purpose: Read human-approved decisions.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/APPROVAL_LOG.md
+    required: false
+    purpose: Confirm approvals.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    required: false
+    purpose: Preserve traceability links.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/09_tasks/09_task_cards.md
+    required: true
+    purpose: Read the selected task card.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/10_prompts/10_implementation_prompts.md
+    required: true
+    purpose: Read the approved implementation prompt.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/08_test_strategy/08_test_strategy.md
+    required: true
+    purpose: Read validation strategy.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/08_test_strategy/08_validation_commands.md
+    required: true
+    purpose: Read test and validation commands.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/11_implementation_results/11_task_result_{{TASK_ID}}.md
+    required: true
+    purpose: Read prior Stage 11 output required by this sub-SKILL.
+    source_of_truth: false
+    approval_required: false
+  - path: /workflow/11_implementation_results/11_test_evidence_{{TASK_ID}}.md
+    required: true
+    purpose: Read prior Stage 11 output required by this sub-SKILL.
+    source_of_truth: false
+    approval_required: false
+  read_if_applicable:
+  - path: /workflow/03_requirements/03_requirements.md
+    condition: Requirement details are needed to verify scope or traceability.
+    purpose: Confirm requirement intent.
+  - path: /workflow/03_requirements/03_acceptance_criteria.md
+    condition: Acceptance criteria are needed for test or evidence mapping.
+    purpose: Confirm acceptance criteria.
+  - path: /workflow/04_domain/04_domain_model.md
+    condition: Domain behavior or terminology is touched.
+    purpose: Preserve domain meaning.
+  - path: /workflow/04_domain/04_business_rules_invariants.md
+    condition: Business rules, invariants, lifecycle, or state transitions are touched.
+    purpose: Preserve domain invariants.
+  - path: /workflow/05_architecture/05_architecture_plan.md
+    condition: Architecture boundaries or design decisions are touched.
+    purpose: Preserve approved architecture.
+  - path: /workflow/05_architecture/05_module_boundaries.md
+    condition: Module ownership or dependency direction is touched.
+    purpose: Preserve module boundaries.
+  - path: /workflow/05_architecture/05_api_contracts.md
+    condition: API behavior is touched.
+    purpose: Preserve API contract.
+  - path: /workflow/06_data/06_logical_schema.md
+    condition: Persistent data structures are touched.
+    purpose: Preserve data design.
+  - path: /workflow/06_data/06_migration_plan.md
+    condition: Migration behavior is touched.
+    purpose: Preserve migration strategy.
+  - path: /workflow/06_data/06_data_security_rules.md
+    condition: Access control, privacy, or data visibility is touched.
+    purpose: Preserve data security rules.
+  - path: /workflow/12_review_release_handoff/review_notes.md
+    condition: The task addresses a review finding.
+    purpose: Understand the review issue being corrected.
+  do_not_read_by_default:
+  - path_or_pattern: full historical agent logs
+    reason: Prompt history is not a source of truth.
+  - path_or_pattern: superseded artifacts
+    reason: Superseded artifacts must not drive implementation.
+  - path_or_pattern: rejected artifacts or rejected implementation options
+    reason: Rejected options must not be revived unless explicitly reopened.
+  - path_or_pattern: unrelated source files
+    reason: Stage 11 should inspect only files relevant to the selected TASK_ID.
+  - path_or_pattern: unapproved implementation prompts
+    reason: Unapproved prompts are not source of truth unless explicitly authorized.
+  missing_input_handling:
+    missing_required_input: Report the missing input, explain why it matters, and stop if implementation cannot be safely bounded.
+    missing_stage_input: Continue only if the missing artifact is not required for the selected TASK_ID and record the assumption or N/A rationale.
+    no_project_context: Stop unless the user explicitly authorizes exploratory implementation with clearly bounded assumptions.
+    conflicting_inputs: Report the conflict and stop if it affects scope, architecture, data, security, privacy, implementation, or release.
+    draft_or_unapproved_inputs: Do not treat drafts as source of truth unless the user explicitly authorizes their use.
+user_directives:
+  path: /workflow/11_implementation_results/USER_DIRECTIVES.md
+  required_if_exists: true
+  handling_rules:
+  - Read before executing any sub-SKILL.
+  - Classify directives as approval, correction, preference, rejection, scope change, constraint, question, or new input.
+  - Do not treat every directive as a globally approved decision.
+  - Report conflicts with approved decisions, task scope, implementation prompts, security constraints, or privacy constraints.
+  - Do not modify USER_DIRECTIVES.md unless explicitly instructed.
+output_contract:
+  mandatory_artifacts:
+  - path: /workflow/11_implementation_results/11_task_result_{{TASK_ID}}.md
+    purpose: Consolidated official task result
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Needs Review
+    - Blocked
+    - Completed Pending Human Review
+    - Approved
+    required_sections:
+    - Status
+    - Inputs Used
+    - Scope Control
+    - Evidence
+    - Open Questions
+    - Human Approval Required
+  - path: /workflow/11_implementation_results/11_test_evidence_{{TASK_ID}}.md
+    purpose: Consolidated official test evidence
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Needs Review
+    - Blocked
+    - Completed Pending Human Review
+    - Approved
+    required_sections:
+    - Status
+    - Inputs Used
+    - Scope Control
+    - Evidence
+    - Open Questions
+    - Human Approval Required
+  - path: /workflow/11_implementation_results/result.md
+    purpose: Stage-level implementation summary
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Needs Review
+    - Blocked
+    - Completed Pending Human Review
+    - Approved
+    required_sections:
+    - Status
+    - Inputs Used
+    - Scope Control
+    - Evidence
+    - Open Questions
+    - Human Approval Required
+  - path: /workflow/context/context_packet.md
+    purpose: Minimal context handoff for Stage 12 or the next task
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Needs Review
+    - Blocked
+    - Completed Pending Human Review
+    - Approved
+    required_sections:
+    - Status
+    - Inputs Used
+    - Scope Control
+    - Evidence
+    - Open Questions
+    - Human Approval Required
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    purpose: Traceability links updated to implementation evidence
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Needs Review
+    - Blocked
+    - Completed Pending Human Review
+    - Approved
+    required_sections:
+    - Status
+    - Inputs Used
+    - Scope Control
+    - Evidence
+    - Open Questions
+    - Human Approval Required
+  conditional_artifacts:
+  - path: /workflow/11_implementation_results/11_manual_verification_{{TASK_ID}}.md
+    condition: If manual verification evidence exists
+    purpose: If manual verification evidence exists
+    n_a_record_required: true
+  - path: /workflow/11_implementation_results/11_migration_evidence_{{TASK_ID}}.md
+    condition: If migration evidence exists
+    purpose: If migration evidence exists
+    n_a_record_required: true
+  - path: /workflow/11_implementation_results/11_api_contract_evidence_{{TASK_ID}}.md
+    condition: If API contract evidence exists
+    purpose: If API contract evidence exists
+    n_a_record_required: true
+  - path: /workflow/11_implementation_results/11_security_privacy_evidence_{{TASK_ID}}.md
+    condition: If security/privacy evidence exists
+    purpose: If security/privacy evidence exists
+    n_a_record_required: true
+  - path: /workflow/11_implementation_results/11_ui_evidence_{{TASK_ID}}.md
+    condition: If UI evidence exists
+    purpose: If UI evidence exists
+    n_a_record_required: true
+  - path: /workflow/11_implementation_results/11_performance_evidence_{{TASK_ID}}.md
+    condition: If performance evidence exists
+    purpose: If performance evidence exists
+    n_a_record_required: true
+  - path: /workflow/11_implementation_results/11_rollback_notes_{{TASK_ID}}.md
+    condition: If rollback notes are required
+    purpose: If rollback notes are required
+    n_a_record_required: true
+  n_a_record:
+    required: true
+    required_fields:
+    - artifact
+    - why_not_applicable
+    - revisit_if
+context_updates:
+  files_to_update:
+  - path: /workflow/context/context_packet.md
+    condition: Always update or prepare for the next sub-skill or next stage.
+    update_rule: Include only the minimum operational context needed by the next execution unit.
+  - path: /workflow/context/ASSUMPTIONS.md
+    condition: Update if working assumptions exist.
+    update_rule: Record assumptions without treating them as decisions.
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    condition: Update if unresolved questions exist.
+    update_rule: Record questions that may affect implementation, validation, review, or release.
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    condition: Update if options were explicitly rejected or superseded.
+    update_rule: Do not revive rejected options unless explicitly reopened.
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    condition: Update if traceability links are introduced or changed.
+    update_rule: Use stable IDs and preserve links from requirement to task, test, and evidence.
+  context_packet:
+    path: /workflow/context/context_packet.md
+    purpose: Prepare minimal operational context for the next sub-skill or Stage 12.
+    next_stage: 12_review_release_handoff
+    required_sections:
+    - Current Project State
+    - Approved Decisions
+    - Working Assumptions
+    - Open Questions
+    - Rejected / Superseded Options
+    - Constraints That Must Not Be Violated
+    - Key Context for Next Stage
+    - Required Inputs for Next Stage
+    - Do Not Do
+traceability:
+  id_conventions:
+    requirements: REQ-001, REQ-002
+    acceptance_criteria: AC-001, AC-002
+    tasks: TASK-001, TASK-002
+    tests: TEST-001, TEST-002
+    evidence: EVID-001, EVID-002
+    questions: Q-001, Q-002
+    risks: R-001, R-002
+  required_links:
+  - Requirement → Acceptance Criteria → Task → Test → Implementation Evidence
+  - Task → Files Changed → Tests Run → Evidence Artifact
+  - Security/Privacy Requirement → Validation Evidence, when applicable
+  prohibited_links:
+  - Do not create new requirements from implementation work.
+  - Do not mark implementation evidence as approved without human approval.
+  - Do not link downstream release approval before Stage 12 review.
+classification_rules:
+  approved_decision:
+    rule: Only explicit human approval can create an approved decision.
+    examples:
+    - 'Approved: TASK-001 implementation result and evidence are accepted for downstream review.'
+  decision_candidate:
+    rule: Agent recommendations awaiting human approval must be marked as decision candidates.
+  working_assumption:
+    rule: Temporary beliefs needed for progress must remain assumptions until confirmed.
+  open_question:
+    rule: Unresolved issues that may affect later implementation, validation, review, or release must be recorded as open questions.
+  rejected_option:
+    rule: Explicitly rejected or superseded implementation options must be recorded and not revived unless reopened.
+  recommendation:
+    rule: Recommendations are not decisions and must not be recorded as approved.
+approval_gate:
+  required: true
+  decisions_to_approve:
+  - Whether this sub-SKILL output can be used by the next sub-SKILL or finalizer.
+  assumptions_to_confirm:
+  - Any working assumptions used by this sub-SKILL.
+  open_questions_to_resolve:
+  - Any unresolved issue that blocks the next sub-SKILL.
+  risks_to_review:
+  - Scope, validation, security, privacy, data, or regression risks discovered by this sub-SKILL.
+  artifacts_ready_for_review:
+  - /workflow/11_implementation_results/11_task_result_{{TASK_ID}}.md
+  - /workflow/11_implementation_results/11_test_evidence_{{TASK_ID}}.md
+  - /workflow/11_implementation_results/result.md
+  - /workflow/context/context_packet.md
+  - /workflow/context/TRACEABILITY_MATRIX.md
+validation:
+  checklist:
+  - Selected TASK_ID is stable.
+  - Required approved inputs are available or blocker is reported.
+  - Output stays within this sub-SKILL responsibility.
+  - Assumptions, open questions, and risks are separated.
+  - Evidence or blocker report is concrete.
+  - Next sub-SKILL handoff is clear.
+  failure_conditions:
+  - Missing required approved input.
+  - Conflicting task scope or user directive.
+  - Relevant code or evidence cannot be inspected.
+  - Implementation or validation would exceed approved scope.
+  blocker_report_required: true
+  blocker_report_fields:
+  - blocking_issue
+  - why_it_matters
+  - affected_artifacts_or_stages
+  - safe_partial_work_completed
+  - human_decision_needed
+prohibited_actions:
+- Do not treat this internal sub-SKILL output as approved stage result.
+- Do not bypass the finalizer.
+- Do not create downstream dependencies on this sub-SKILL path.
+- Do not make unapproved architecture, data, API, security, privacy, or dependency changes.
+- Do not claim validation success without evidence.
+specialization_hooks:
+  allowed: true
+  examples:
+  - name: web_saas
+    may_add:
+    - browser or API validation evidence
+    - authorization test evidence
+    - deployment preview notes
+  - name: internal_tool
+    may_add:
+    - operator workflow verification
+    - admin permission checks
+    - manual business process validation
+  - name: mobile_app
+    may_add:
+    - device or simulator evidence
+    - permission behavior evidence
+    - offline or sync validation
+  - name: ai_data_product
+    may_add:
+    - dataset or fixture validation
+    - model output evaluation evidence
+    - human review evidence
+  - name: regulated_security_sensitive
+    may_add:
+    - security control evidence
+    - privacy validation evidence
+    - audit log evidence
+  - name: brownfield_legacy
+    may_add:
+    - regression baseline comparison
+    - compatibility checks
+    - migration safety notes
+  must_not_change:
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries
+  - task_scope
+tool_wrapper_hooks:
+  allowed:
+  - file_creation_commands
+  - save_locations
+  - sandbox_rules
+  - review_workflow
+  - command_invocation_conventions
+  - test_command_invocation
+  must_not_change:
+  - stage_reasoning
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries
+  - task_scope

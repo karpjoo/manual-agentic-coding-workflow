@@ -1,0 +1,223 @@
+contract_version: 1.0.0
+skill:
+  name: 05a_architecture_drivers_options
+  stage: 05 Architecture & Technical Contracts
+  title: Architecture Drivers & Options
+  skill_path: /skills/05_architecture_contracts/05a_architecture_drivers_options/SKILL.md
+  readme_path: /skills/05_architecture_contracts/05a_architecture_drivers_options/README.md
+  primary_output: /workflow/05_architecture/05_architecture_plan.md
+  requires_human_approval: true
+  parent_skill: /skills/05_architecture_contracts/SKILL.md
+  external_visibility: internal
+parent_stage:
+  name: 05_architecture_contracts
+  path: /skills/05_architecture_contracts
+  public_contract: /skills/05_architecture_contracts/artifact_contract.yml
+  downstream_dependency_allowed: false
+subskill:
+  id: 05a
+  name: architecture_drivers_options
+  order: 05a
+  previous_subskill: /skills/04_domain_modeling/SKILL.md
+  next_subskill: /skills/05_architecture_contracts/05b_system_module_boundaries/SKILL.md
+  finalizer_required_for_stage_completion: true
+purpose:
+  summary: Extract architecture drivers, define system context, compare architecture options, and draft recommended architecture direction as a decision candidate.
+  core_question: What Stage 5 architecture information must this sub-skill produce so the finalizer can consolidate official artifacts without making unapproved decisions?
+input_contract:
+  always_read:
+  - path: /workflow/context/artifact_manifest.yml
+    required: true
+    purpose: Artifact status, approval, supersession, and source tracking.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/context_packet.md
+    required: true
+    purpose: Minimal operational context and required inputs for the current stage.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/DECISIONS.md
+    required: true
+    purpose: Human-approved decisions only.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/ASSUMPTIONS.md
+    required: true
+    purpose: Working assumptions that must not be treated as approved decisions.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    required: true
+    purpose: Unresolved questions that may affect architecture.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    required: true
+    purpose: Rejected or superseded options that must not be revived without approval.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    required: true
+    purpose: Existing traceability links to preserve or improve.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/APPROVAL_LOG.md
+    required: true
+    purpose: Approval status and history when available.
+    source_of_truth: true
+    approval_required: false
+  read_if_applicable:
+  - path: /workflow/00_intake/00_project_intake.md
+    condition: Project profile, fixed stack, hosting, platform, or constraints are unclear from context.
+    purpose: Activated by project context, user directives, or previous Stage 5 outputs.
+  - path: /workflow/00_intake/00_existing_context_review.md
+    condition: Project is brownfield, legacy, migration, or existing-system extension work.
+    purpose: Activated by project context, user directives, or previous Stage 5 outputs.
+  - path: /workflow/04_domain/04_domain_traceability_matrix.md
+    condition: Stage 4 produced a separate domain traceability matrix.
+    purpose: Activated by project context, user directives, or previous Stage 5 outputs.
+  - path: /workflow/04_domain/result.md
+    condition: Stage 4 contains architecture-relevant warnings, assumptions, or handoff notes.
+    purpose: Activated by project context, user directives, or previous Stage 5 outputs.
+  do_not_read_by_default:
+  - path_or_pattern: raw prompt history or raw agent logs
+    reason: Not source of truth.
+  - path_or_pattern: unapproved internal notes
+    reason: Draft internals are not approved artifacts.
+  - path_or_pattern: future-stage artifacts
+    reason: Downstream outputs must not drive Stage 5 design.
+  - path_or_pattern: implementation source code
+    reason: Not needed unless brownfield review is explicitly required.
+  missing_input_handling:
+    missing_required_input: Report missing input, explain impact, and stop if it affects architecture safety or traceability.
+    missing_stage_input: Report missing previous Stage 5 output; proceed only if the human explicitly allows partial execution.
+    no_project_context: Do not invent project-specific architecture; request approved artifacts or proceed as exploratory only if instructed.
+    conflicting_inputs: Report conflict and do not silently resolve approved decisions.
+    draft_or_unapproved_inputs: Use only if explicitly allowed and mark resulting outputs as draft.
+user_directives:
+  path: /workflow/05_architecture/USER_DIRECTIVES.md
+  required_if_exists: true
+  handling_rules:
+  - Read before executing the sub-skill.
+  - Classify directives as approval, correction, preference, rejection, scope change, constraint, question, or new input.
+  - Do not treat every directive as a globally approved decision.
+  - Report conflicts with approved decisions.
+output_contract:
+  mandatory_artifacts:
+  - path: /workflow/05_architecture/05_architecture_plan.md
+    purpose: Draft architecture plan, drivers, system context, options, and recommended direction.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+  - path: /workflow/05_architecture/05_architecture_decisions.md
+    purpose: Initial architecture decision candidates and option trade-offs.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+  conditional_artifacts: []
+  n_a_record:
+    required: true
+    required_fields:
+    - artifact
+    - why_not_applicable
+    - revisit_if
+context_updates:
+  files_to_update:
+  - path: /workflow/context/ASSUMPTIONS.md
+    condition: Update if working assumptions exist.
+    update_rule: Record assumptions without treating them as decisions.
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    condition: Update if unresolved questions exist.
+    update_rule: Record questions that may affect later stages.
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    condition: Update if options were explicitly rejected or superseded.
+    update_rule: Do not revive rejected options unless explicitly reopened.
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    condition: Update if traceability links are introduced or changed.
+    update_rule: Use stable IDs and preserve existing links.
+  handoff:
+    next_subskill: /skills/05_architecture_contracts/05b_system_module_boundaries/SKILL.md
+    rule: Prepare only the local context needed by the next sub-skill; final Stage 6 handoff is the responsibility of 05e_architecture_finalizer.
+traceability:
+  required_links:
+  - Requirement → Acceptance Criteria → Domain Concept / Invariant / Event → Architecture Component / Contract / Policy
+  prohibited_links:
+  - Do not link downstream stages to this internal sub-skill path.
+  - Do not create implementation evidence links in Stage 5.
+classification_rules:
+  approved_decision:
+    rule: Only explicit human approval can create an approved decision.
+  decision_candidate:
+    rule: Sub-skill recommendations must be marked as decision candidates.
+  working_assumption:
+    rule: Temporary beliefs needed for progress must remain assumptions until confirmed.
+  open_question:
+    rule: Unresolved issues affecting later work must be recorded as open questions.
+  rejected_option:
+    rule: Rejected or superseded options must not be revived unless reopened.
+  recommendation:
+    rule: Recommendations are not decisions.
+approval_gate:
+  required: true
+  decisions_to_approve:
+  - Architecture style and direction
+  - Major technical choices
+  - Architecture option recommendation
+  assumptions_to_confirm:
+  - Sub-skill-specific architecture assumptions.
+  open_questions_to_resolve:
+  - Sub-skill-specific questions affecting later Stage 5 work or Stage 6 Data Design.
+  risks_to_review:
+  - Sub-skill-specific architecture, security, privacy, operations, or traceability risks.
+  artifacts_ready_for_review:
+  - /workflow/05_architecture/05_architecture_plan.md
+  - /workflow/05_architecture/05_architecture_decisions.md
+validation:
+  checklist:
+  - Architecture drivers are extracted from approved inputs.
+  - Architecture options and trade-offs are documented.
+  - Recommendations are marked as decision candidates, not approved decisions.
+  failure_conditions:
+  - Required source artifact is missing or unapproved.
+  - Conflict with approved decisions cannot be safely resolved.
+  - Output cannot preserve traceability.
+  blocker_report_required: true
+  blocker_report_fields:
+  - blocking_issue
+  - why_it_matters
+  - affected_artifacts_or_stages
+  - safe_partial_work_completed
+  - human_decision_needed
+prohibited_actions:
+- Do not mark recommended architecture as approved.
+- Do not design detailed database schema.
+- Do not implement code.
+- Do not treat this internal sub-skill as a public downstream contract.
+specialization_hooks:
+  allowed: true
+  must_not_change:
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries
+tool_wrapper_hooks:
+  allowed:
+  - file_creation_commands
+  - save_locations
+  - sandbox_rules
+  - review_workflow
+  - command_invocation_conventions
+  must_not_change:
+  - stage_reasoning
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries

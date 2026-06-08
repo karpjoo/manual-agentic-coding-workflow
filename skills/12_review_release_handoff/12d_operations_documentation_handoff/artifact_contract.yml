@@ -1,0 +1,328 @@
+contract_version: 1.0.0
+skill:
+  name: 12d_operations_documentation_handoff
+  stage: 12 Review / Security / Release / Handoff
+  title: Operations / Documentation Handoff
+  skill_path: /skills/12_review_release_handoff/12d_operations_documentation_handoff/SKILL.md
+  readme_path: /skills/12_review_release_handoff/12d_operations_documentation_handoff/README.md
+  primary_output: /workflow/12_review_release_handoff/12_documentation_handoff.md
+  requires_human_approval: true
+  external_visibility: internal
+parent_stage:
+  name: 12_review_release_handoff
+  path: /skills/12_review_release_handoff
+  public_contract: /skills/12_review_release_handoff/artifact_contract.yml
+subskill:
+  id: 12d
+  name: 12d_operations_documentation_handoff
+  skill_path: /skills/12_review_release_handoff/12d_operations_documentation_handoff/SKILL.md
+  previous_subskill: /skills/12_review_release_handoff/12c_release_deployment_readiness/SKILL.md
+  next_subskill: /skills/12_review_release_handoff/12e_review_release_finalizer/SKILL.md
+  external_visibility: internal
+  downstream_dependency_allowed: false
+purpose:
+  summary: Prepare operations runbook and documentation handoff by reviewing runtime dependencies, monitoring, troubleshooting,
+    ownership, setup docs, release notes, and known limitations.
+  core_question: Can a human operator, maintainer, or future developer understand how to run, monitor, troubleshoot, support,
+    and continue the released system using current documentation?
+input_contract:
+  always_read:
+  - path: /workflow/context/artifact_manifest.yml
+    required: true
+    purpose: Artifact status, approval state, supersession, and source-of-truth checks.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/context_packet.md
+    required: true
+    purpose: Minimal operational context from the previous stage.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/DECISIONS.md
+    required: true
+    purpose: Human-approved decisions only.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/ASSUMPTIONS.md
+    required: false
+    purpose: Active working assumptions.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    required: false
+    purpose: Unresolved questions affecting release review.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    required: false
+    purpose: Options that must not be revived unless reopened.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    required: false
+    purpose: Traceability across goals, requirements, tests, tasks, and evidence.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/APPROVAL_LOG.md
+    required: false
+    purpose: Human approval records.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/07_mvp_release/07_mvp_scope.md
+    required: true
+    purpose: Release scope.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/08_test_strategy/08_validation_commands.md
+    required: false
+    purpose: Validation commands.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/11_implementation_results/
+    required: true
+    purpose: Implementation evidence.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/12_review_release_handoff/12_code_review.md
+    required: true
+    purpose: Code review results.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/12_review_release_handoff/12_security_privacy_review.md
+    required: true
+    purpose: Security/privacy review results.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/12_review_release_handoff/12_release_readiness.md
+    required: true
+    purpose: Release readiness results.
+    source_of_truth: true
+    approval_required: false
+  read_if_applicable:
+  - path: /workflow/12_review_release_handoff/12_deployment_plan.md
+    condition: Deployment is in scope.
+    purpose: Deployment documentation and operations context.
+  - path: Project README, setup docs, API docs, admin docs, deployment docs, docs directory
+    condition: Available and relevant.
+    purpose: Documentation freshness review.
+  - path: CI/deployment configuration and package scripts
+    condition: Needed to document operations.
+    purpose: Run/test/deploy operations context.
+  do_not_read_by_default:
+  - path_or_pattern: raw chat history
+    reason: Not a stable source of truth.
+  - path_or_pattern: raw agent scratchpads
+    reason: May contain unapproved reasoning or stale assumptions.
+  - path_or_pattern: superseded artifacts
+    reason: Must not be treated as current truth.
+  - path_or_pattern: rejected artifacts
+    reason: Must not be revived unless explicitly reopened.
+  - path_or_pattern: production secrets or secret values
+    reason: Secret values must not be exposed or copied.
+  - path_or_pattern: unrelated historical drafts
+    reason: Avoid context pollution and stale assumptions.
+  missing_input_handling:
+    missing_required_input: Report the missing input, explain why it matters for release review, mark it blocking or non-blocking,
+      and produce a blocker report if blocking.
+    missing_stage_input: Continue only with clearly labeled assumptions when safe; otherwise stop and request human decision.
+    no_project_context: Do not invent project facts. Produce a preflight blocker report.
+    conflicting_inputs: Report the conflicting sources and do not silently resolve conflicts that affect release, security,
+      privacy, deployment, or handoff.
+    draft_or_unapproved_inputs: Use only as draft context unless the user explicitly requests exploratory review.
+user_directives:
+  path: /workflow/12_review_release_handoff/USER_DIRECTIVES.md
+  required_if_exists: true
+  handling_rules:
+  - Read before executing the sub-SKILL.
+  - Classify directives as approval, correction, preference, rejection, scope change, constraint, question, or new input.
+  - Do not treat every directive as a globally approved decision.
+  - Report conflicts with approved decisions.
+output_contract:
+  mandatory_artifacts:
+  - path: /workflow/12_review_release_handoff/12_documentation_handoff.md
+    purpose: Documentation freshness, gaps, handoff checklist, known limitations, and human approval needs.
+    required: true
+    approval_required: true
+    status_values:
+    - Draft
+    - Approved
+    - Needs Review
+    required_sections:
+    - Review Scope
+    - Inputs Used
+    - Findings
+    - Blockers
+    - Warnings
+    - Suggestions
+    - Assumptions
+    - Open Questions
+    - Human Approval Required
+  conditional_artifacts:
+  - path: /workflow/12_review_release_handoff/12_operations_runbook.md
+    condition: The system will be operated, monitored, supported, deployed, maintained, or handed off.
+    purpose: The system will be operated, monitored, supported, deployed, maintained, or handed off.
+    n_a_record_required: true
+  n_a_record:
+    required: true
+    required_fields:
+    - artifact
+    - why_not_applicable
+    - revisit_if
+context_updates:
+  files_to_update:
+  - path: /workflow/context/context_packet.md
+    condition: Always update or prepare for the next stage or next sub-SKILL.
+    update_rule: Include only the minimum operational context needed by the next stage or sub-SKILL.
+  - path: /workflow/context/ASSUMPTIONS.md
+    condition: Update if working assumptions exist.
+    update_rule: Record assumptions without treating them as decisions.
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    condition: Update if unresolved questions exist.
+    update_rule: Record questions that may affect release, deployment, operations, handoff, or retrospective.
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    condition: Update if options were explicitly rejected or superseded.
+    update_rule: Do not revive rejected options unless explicitly reopened.
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    condition: Update if traceability links are introduced or changed.
+    update_rule: Use stable IDs and preserve existing links.
+  context_packet:
+    path: /workflow/context/context_packet.md
+    purpose: Prepare minimal context for the next stage or sub-SKILL.
+    next_stage: /skills/12_review_release_handoff/12e_review_release_finalizer/SKILL.md
+    required_sections:
+    - Current Project State
+    - Approved Decisions
+    - Working Assumptions
+    - Open Questions
+    - Rejected / Superseded Options
+    - Constraints That Must Not Be Violated
+    - Key Context for Next Stage
+    - Required Inputs for Next Stage
+    - Do Not Do
+traceability:
+  id_conventions:
+    review_findings: REV-001, REV-002
+    security_findings: SEC-001, SEC-002
+    privacy_findings: PRIV-001, PRIV-002
+    release_findings: REL-001, REL-002
+    operations_findings: OPS-001, OPS-002
+    documentation_findings: DOC-001, DOC-002
+  required_links:
+  - Release Status → Operational Risk → Documentation Gap → Handoff Approval Candidate
+  prohibited_links:
+  - Do not create downstream public dependencies on this internal sub-SKILL output.
+classification_rules:
+  approved_decision:
+    rule: Only explicit human approval can create an approved decision.
+    examples:
+    - Release as internal-only candidate with warning REL-001.
+  decision_candidate:
+    rule: Agent recommendations awaiting human approval must be marked as decision candidates.
+  working_assumption:
+    rule: Temporary beliefs needed for progress must remain assumptions until confirmed.
+  open_question:
+    rule: Unresolved issues that may affect later work must be recorded as open questions.
+  rejected_option:
+    rule: Explicitly rejected or superseded options must be recorded and not revived unless reopened.
+  recommendation:
+    rule: Recommendations are not decisions and must not be recorded as approved.
+approval_gate:
+  required: true
+  decisions_to_approve:
+  - Operations ownership
+  - Documentation blockers
+  - Handoff approval candidates
+  - Open questions affecting support or maintenance
+  assumptions_to_confirm:
+  - Sub-SKILL assumptions affecting release readiness.
+  open_questions_to_resolve:
+  - Questions affecting this sub-SKILL or later Stage 12 work.
+  risks_to_review:
+  - Blockers and warnings identified by this sub-SKILL.
+  artifacts_ready_for_review:
+  - /workflow/12_review_release_handoff/12_documentation_handoff.md
+  - /workflow/12_review_release_handoff/12_operations_runbook.md
+validation:
+  checklist:
+  - Operations handoff need is identified.
+  - Documentation claims are checked against evidence.
+  - Known limitations are documented.
+  - Operations/documentation blockers are separated from suggestions.
+  failure_conditions:
+  - Required approved input is missing.
+  - Conflicting approved decisions affect review.
+  - Evidence needed for this sub-SKILL is missing.
+  - USER_DIRECTIVES.md conflicts with approved release scope or risk decisions.
+  blocker_report_required: true
+  blocker_report_fields:
+  - blocking_issue
+  - why_it_matters
+  - affected_artifacts_or_stages
+  - safe_partial_work_completed
+  - human_decision_needed
+prohibited_actions:
+- Do not claim handoff is complete without evidence.
+- Do not copy logs containing sensitive data.
+- Do not approve operations ownership on behalf of the human.
+- Do not approve release or deployment.
+- Do not treat assumptions as decisions.
+- Do not create project features or implementation changes.
+specialization_hooks:
+  allowed: true
+  examples:
+  - name: web_saas
+    may_add:
+    - hosting readiness
+    - auth callback domain review
+    - CORS/API exposure review
+    - production environment review
+  - name: internal_tool
+    may_add:
+    - operator documentation
+    - access provisioning
+    - audit expectations
+    - organizational owner handoff
+  - name: mobile_app
+    may_add:
+    - app store release checklist
+    - device permission review
+    - offline/sync behavior review
+    - crash reporting
+  - name: ai_data_product
+    may_add:
+    - model output risk review
+    - dataset provenance review
+    - evaluation evidence review
+    - human review requirements
+  - name: regulated_security_sensitive
+    may_add:
+    - compliance constraints
+    - privacy impact review
+    - audit log review
+    - stronger release blockers
+  - name: brownfield_legacy
+    may_add:
+    - regression risk review
+    - backward compatibility review
+    - migration safety review
+    - legacy integration review
+  must_not_change:
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries
+tool_wrapper_hooks:
+  allowed:
+  - file_creation_commands
+  - save_locations
+  - sandbox_rules
+  - review_workflow
+  - command_invocation_conventions
+  - artifact_validation_commands
+  must_not_change:
+  - stage_reasoning
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries

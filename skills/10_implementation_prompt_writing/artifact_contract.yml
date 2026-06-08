@@ -1,0 +1,580 @@
+contract_version: "1.0.0"
+
+skill:
+  name: "10_implementation_prompt_writing"
+  stage: "10 Implementation Prompt Writing"
+  title: "Implementation Prompt Writing"
+  skill_path: "/skills/10_implementation_prompt_writing/SKILL.md"
+  readme_path: "/skills/10_implementation_prompt_writing/README.md"
+  primary_output: "/workflow/10_prompts/10_implementation_prompts.md"
+  stage_result: "/workflow/10_prompts/result.md"
+  previous_stage: "09_task_breakdown"
+  next_stage: "11_tdd_implementation_loop"
+  requires_human_approval: true
+  internal_split: false
+
+purpose:
+  summary: "Convert approved Stage 9 task cards into scoped, test-aware, evidence-producing implementation prompts and handoff packets for Stage 11 coding agents."
+  core_question: "Can each approved task card become a bounded implementation prompt that a coding agent can execute without expanding scope or violating approved decisions?"
+
+input_contract:
+  always_read:
+    - path: "/workflow/context/artifact_manifest.yml"
+      required: true
+      purpose: "Check artifact existence, status, approval, and supersession before using sources."
+      source_of_truth: true
+      approval_required: false
+    - path: "/workflow/context/context_packet.md"
+      required: true
+      purpose: "Read current project state, constraints, required inputs, and Stage 10 handoff context."
+      source_of_truth: false
+      approval_required: false
+    - path: "/workflow/context/DECISIONS.md"
+      required: true
+      purpose: "Use only explicit human-approved decisions as implementation prompt constraints."
+      source_of_truth: true
+      approval_required: false
+    - path: "/workflow/context/APPROVAL_LOG.md"
+      required: false
+      purpose: "Confirm explicit approvals when available."
+      source_of_truth: true
+      approval_required: false
+    - path: "/workflow/context/ASSUMPTIONS.md"
+      required: false
+      purpose: "Carry active working assumptions into prompt readiness review."
+      source_of_truth: false
+      approval_required: false
+    - path: "/workflow/context/OPEN_QUESTIONS.md"
+      required: false
+      purpose: "Identify unresolved questions that may block prompt writing or Stage 11 execution."
+      source_of_truth: false
+      approval_required: false
+    - path: "/workflow/context/REJECTED_OPTIONS.md"
+      required: false
+      purpose: "Avoid reviving rejected prompt strategies or implementation approaches."
+      source_of_truth: true
+      approval_required: false
+    - path: "/workflow/context/TRACEABILITY_MATRIX.md"
+      required: false
+      purpose: "Preserve existing traceability links from goals to requirements, tasks, tests, prompts, and evidence."
+      source_of_truth: true
+      approval_required: false
+    - path: "/workflow/03_requirements/03_requirements.md"
+      required: true
+      purpose: "Provide approved requirements linked to implementation tasks."
+      source_of_truth: true
+      approval_required: true
+    - path: "/workflow/03_requirements/03_acceptance_criteria.md"
+      required: true
+      purpose: "Provide acceptance criteria that prompts must preserve and validate."
+      source_of_truth: true
+      approval_required: true
+    - path: "/workflow/05_architecture/05_architecture_plan.md"
+      required: true
+      purpose: "Constrain implementation prompts to approved architecture direction."
+      source_of_truth: true
+      approval_required: true
+    - path: "/workflow/05_architecture/05_module_boundaries.md"
+      required: true
+      purpose: "Constrain allowed change scope and forbidden module boundary changes."
+      source_of_truth: true
+      approval_required: true
+    - path: "/workflow/07_mvp_release/07_mvp_scope.md"
+      required: true
+      purpose: "Ensure prompts do not expand beyond approved MVP or release scope."
+      source_of_truth: true
+      approval_required: true
+    - path: "/workflow/08_test_strategy/08_test_strategy.md"
+      required: true
+      purpose: "Map each prompt to required validation methods."
+      source_of_truth: true
+      approval_required: true
+    - path: "/workflow/08_test_strategy/08_validation_commands.md"
+      required: true
+      purpose: "Define commands that Stage 11 agents must run or cite as missing."
+      source_of_truth: true
+      approval_required: true
+    - path: "/workflow/09_tasks/09_task_inventory.md"
+      required: true
+      purpose: "Identify the approved task set for prompt generation."
+      source_of_truth: true
+      approval_required: true
+    - path: "/workflow/09_tasks/09_task_cards.md"
+      required: true
+      purpose: "Primary source for task-by-task implementation prompt writing."
+      source_of_truth: true
+      approval_required: true
+    - path: "/workflow/09_tasks/09_dependency_order.md"
+      required: true
+      purpose: "Preserve approved task order and dependencies in prompt execution order."
+      source_of_truth: true
+      approval_required: true
+    - path: "/workflow/09_tasks/09_traceability_matrix.md"
+      required: true
+      purpose: "Link tasks to requirements, acceptance criteria, tests, and prompt IDs."
+      source_of_truth: true
+      approval_required: true
+
+  read_if_applicable:
+    - path: "/workflow/00_intake/00_existing_context_review.md"
+      condition: "Project is brownfield or modifies an existing codebase."
+      purpose: "Preserve compatibility constraints and no-touch areas."
+    - path: "/workflow/04_domain/04_ubiquitous_language.md"
+      condition: "Domain terms affect prompt wording."
+      purpose: "Use approved domain terminology in prompts."
+    - path: "/workflow/04_domain/04_domain_model.md"
+      condition: "Tasks touch entities, value objects, aggregates, or workflows."
+      purpose: "Preserve domain model meaning during implementation."
+    - path: "/workflow/04_domain/04_business_rules_invariants.md"
+      condition: "Tasks touch invariants, validation rules, lifecycle, or state transitions."
+      purpose: "Carry business rules into required tests and stop conditions."
+    - path: "/workflow/04_domain/04_domain_events.md"
+      condition: "Tasks touch events, async workflows, or notifications."
+      purpose: "Constrain event-related implementation prompts."
+    - path: "/workflow/05_architecture/05_api_contracts.md"
+      condition: "Tasks add, change, or depend on APIs."
+      purpose: "Preserve approved API contracts."
+    - path: "/workflow/05_architecture/05_integration_contracts.md"
+      condition: "Tasks touch external services, queues, webhooks, LLM APIs, or third-party APIs."
+      purpose: "Preserve integration boundaries and external data transfer constraints."
+    - path: "/workflow/05_architecture/05_architecture_decisions.md"
+      condition: "Prompts may be affected by approved trade-offs or rejected architecture options."
+      purpose: "Avoid architecture drift."
+    - path: "/workflow/06_data/06_conceptual_data_model.md"
+      condition: "Tasks touch persistent data concepts."
+      purpose: "Preserve data concept boundaries."
+    - path: "/workflow/06_data/06_logical_schema.md"
+      condition: "Tasks touch data shape, relations, constraints, or ownership."
+      purpose: "Constrain data-related changes."
+    - path: "/workflow/06_data/06_physical_schema.md"
+      condition: "Tasks touch implementation-level schema."
+      purpose: "Constrain physical schema changes."
+    - path: "/workflow/06_data/06_indexes.md"
+      condition: "Tasks touch query patterns, filtering, sorting, or performance-sensitive reads."
+      purpose: "Carry query and index constraints into prompts."
+    - path: "/workflow/06_data/06_migration_plan.md"
+      condition: "Tasks require migration, seed, backfill, rollback, or compatibility work."
+      purpose: "Add migration-safe prompt boundaries."
+    - path: "/workflow/06_data/06_data_security_rules.md"
+      condition: "Tasks touch authorization, access control, or privacy-sensitive data."
+      purpose: "Carry access-control constraints into prompts."
+    - path: "/workflow/08_test_strategy/08_acceptance_tests.md"
+      condition: "Acceptance tests are defined separately."
+      purpose: "Reference acceptance-level validation in prompts."
+    - path: "/workflow/08_test_strategy/08_manual_test_plan.md"
+      condition: "Manual validation is required."
+      purpose: "Carry manual verification steps into prompts."
+    - path: "/workflow/09_tasks/09_task_risk_notes.md"
+      condition: "Task-specific risk notes exist."
+      purpose: "Carry risk notes into stop conditions and evidence requirements."
+    - path: "/workflow/10_prompts/USER_DIRECTIVES.md"
+      condition: "Stage-local user instructions exist."
+      purpose: "Apply current human instructions before agent assumptions."
+
+  do_not_read_by_default:
+    - path_or_pattern: "raw chat history"
+      reason: "Prompt artifacts must be reproducible from files, not conversation memory."
+    - path_or_pattern: "full agent logs"
+      reason: "Logs are not source-of-truth artifacts."
+    - path_or_pattern: "unrelated previous-stage drafts"
+      reason: "Draft artifacts may conflict with approved artifacts."
+    - path_or_pattern: "superseded artifacts"
+      reason: "Superseded artifacts must not be treated as current truth."
+    - path_or_pattern: "rejected artifacts"
+      reason: "Use only to avoid reviving rejected options, not as source material."
+    - path_or_pattern: "internal sub-skill outputs not promoted to official artifacts"
+      reason: "Downstream stages rely on approved official artifacts only."
+    - path_or_pattern: "source code files"
+      reason: "Read only when needed to write inspection instructions or when explicitly requested."
+    - path_or_pattern: "generated files, vendor directories, build artifacts, dependency lockfiles"
+      reason: "Usually irrelevant to prompt writing unless explicitly part of inspection scope."
+
+  missing_input_handling:
+    missing_required_input: "Report the missing input, explain why it matters, and mark the issue Blocking unless the user explicitly allows draft prompt writing."
+    missing_stage_input: "Record the gap in result.md or prompt readiness issues and avoid writing executable prompts for affected tasks."
+    no_project_context: "Stop or produce only a reusable blocker report; do not invent project-specific prompt content."
+    conflicting_inputs: "Report conflicting sources, identify impact, and stop if the conflict affects scope, architecture, data, security, privacy, validation, or execution order."
+    draft_or_unapproved_inputs: "Use only if explicitly permitted for draft prompt writing; mark resulting prompts Draft or Needs Review."
+
+user_directives:
+  path: "/workflow/10_prompts/USER_DIRECTIVES.md"
+  required_if_exists: true
+  handling_rules:
+    - "Read before executing the SKILL."
+    - "Classify directives as approval, correction, preference, rejection, scope change, implementation constraint, tool-specific instruction, formatting instruction, added input, or question."
+    - "Apply directives before agent assumptions."
+    - "Do not treat every directive as a globally approved decision."
+    - "Report conflicts with approved decisions."
+    - "Treat scope-changing directives as decision candidates unless explicit approval exists."
+    - "Do not modify USER_DIRECTIVES.md unless explicitly instructed."
+
+output_contract:
+  mandatory_artifacts:
+    - path: "/workflow/10_prompts/10_implementation_prompts.md"
+      purpose: "Official implementation prompt set for Stage 11."
+      required: true
+      approval_required: true
+      status_values:
+        - Draft
+        - Needs Review
+        - Approved
+        - Blocked
+      required_sections:
+        - "Document Status"
+        - "Prompt Set Summary"
+        - "Prompt Execution Order"
+        - "Implementation Prompts"
+    - path: "/workflow/10_prompts/10_prompt_handoff_packets.md"
+      purpose: "Per-prompt handoff packets for fresh Stage 11 coding-agent sessions."
+      required: true
+      approval_required: true
+      status_values:
+        - Draft
+        - Needs Review
+        - Approved
+        - Blocked
+      required_sections:
+        - "Document Status"
+        - "How to Use These Packets"
+        - "Handoff Packets"
+    - path: "/workflow/10_prompts/result.md"
+      purpose: "Stage 10 execution summary, readiness findings, traceability updates, and approval gate."
+      required: true
+      approval_required: true
+      status_values:
+        - Draft
+        - Needs Review
+        - Approved
+      required_sections:
+        - "Task Summary"
+        - "Inputs Used"
+        - "Outputs Created or Updated"
+        - "Prompt Set Summary"
+        - "Prompt Readiness Findings"
+        - "Decision Candidates"
+        - "Working Assumptions"
+        - "Open Questions"
+        - "Risks and Constraints"
+        - "Rejected or Superseded Options"
+        - "Traceability Updates"
+        - "Human Approval Required"
+        - "Recommended Next Step"
+    - path: "/workflow/context/context_packet.md"
+      purpose: "Minimal operational context for Stage 11."
+      required: true
+      approval_required: false
+      status_values:
+        - Draft
+        - Needs Review
+        - Approved
+      required_sections:
+        - "Current Project State"
+        - "Approved Decisions"
+        - "Working Assumptions"
+        - "Open Questions"
+        - "Rejected / Superseded Options"
+        - "Constraints That Must Not Be Violated"
+        - "Key Context for Next Stage"
+        - "Required Inputs for Next Stage"
+        - "Do Not Do"
+
+  conditional_artifacts:
+    - path: "/workflow/10_prompts/10_prompt_readiness_issues.md"
+      condition: "Tasks are too broad, ambiguous, blocked, unsafe, or under-specified."
+      purpose: "Record prompt-readiness issues and human decisions needed."
+      n_a_record_required: true
+    - path: "/workflow/10_prompts/10_prompt_execution_order.md"
+      condition: "Prompt order refines or differs from Stage 9 dependency order."
+      purpose: "Document prompt execution order and decision candidates."
+      n_a_record_required: true
+    - path: "/workflow/10_prompts/10_prompt_traceability_matrix.md"
+      condition: "Prompt-level traceability is useful beyond the global matrix."
+      purpose: "Provide a Stage 10 traceability view from tasks to prompts and expected evidence."
+      n_a_record_required: true
+    - path: "/workflow/10_prompts/10_tool_wrapper_notes.md"
+      condition: "Prompts need tool-specific variants or execution notes."
+      purpose: "Record wrapper-specific instructions without changing stage reasoning."
+      n_a_record_required: true
+    - path: "/workflow/10_prompts/10_security_privacy_prompt_notes.md"
+      condition: "Special security, privacy, logging, audit, or data-handling prompt constraints are needed."
+      purpose: "Carry security/privacy constraints into relevant implementation prompts."
+      n_a_record_required: true
+    - path: "/workflow/10_prompts/10_migration_prompt_notes.md"
+      condition: "Prompts include migration, backfill, seed data, rollback, or compatibility work."
+      purpose: "Record migration-safe implementation prompt constraints."
+      n_a_record_required: true
+
+  n_a_record:
+    required: true
+    required_fields:
+      - artifact
+      - why_not_applicable
+      - revisit_if
+
+context_updates:
+  files_to_update:
+    - path: "/workflow/context/context_packet.md"
+      condition: "Always update or prepare for Stage 11."
+      update_rule: "Include only the minimum operational context needed by Stage 11; link to prompt artifacts rather than copying full prompt text."
+    - path: "/workflow/context/ASSUMPTIONS.md"
+      condition: "Update if working assumptions exist."
+      update_rule: "Record assumptions without treating them as decisions."
+    - path: "/workflow/context/OPEN_QUESTIONS.md"
+      condition: "Update if unresolved questions affect prompt readiness or Stage 11 execution."
+      update_rule: "Record questions that may affect implementation, validation, security, privacy, or task order."
+    - path: "/workflow/context/REJECTED_OPTIONS.md"
+      condition: "Update if prompt strategies or implementation approaches were explicitly rejected or superseded."
+      update_rule: "Do not revive rejected options unless explicitly reopened."
+    - path: "/workflow/context/TRACEABILITY_MATRIX.md"
+      condition: "Update if traceability links are introduced or changed."
+      update_rule: "Use stable IDs and preserve existing links."
+
+  context_packet:
+    path: "/workflow/context/context_packet.md"
+    purpose: "Prepare minimal context for Stage 11 TDD Implementation Loop."
+    next_stage: "11_tdd_implementation_loop"
+    required_sections:
+      - "Current Project State"
+      - "Approved Decisions"
+      - "Working Assumptions"
+      - "Open Questions"
+      - "Rejected / Superseded Options"
+      - "Constraints That Must Not Be Violated"
+      - "Key Context for Next Stage"
+      - "Required Inputs for Next Stage"
+      - "Do Not Do"
+    required_next_stage_inputs:
+      - "/workflow/10_prompts/10_implementation_prompts.md"
+      - "/workflow/10_prompts/10_prompt_handoff_packets.md"
+      - "/workflow/10_prompts/result.md"
+      - "/workflow/context/context_packet.md"
+      - "approved source artifacts named by each handoff packet"
+
+traceability:
+  id_conventions:
+    goals: "G-001, G-002"
+    requirements: "REQ-001, REQ-002"
+    acceptance_criteria: "AC-001, AC-002"
+    tests: "TEST-001, TEST-002"
+    tasks: "TASK-001, TASK-002"
+    prompts: "PROMPT-001, PROMPT-002"
+    handoff_packets: "HANDOFF-001, HANDOFF-002"
+    prompt_readiness_issues: "PRI-001, PRI-002"
+    evidence_placeholders: "EVIDENCE-TASK-001, EVIDENCE-TASK-002"
+    assumptions: "A-001, A-002"
+    questions: "Q-001, Q-002"
+    risks: "R-001, R-002"
+
+  required_links:
+    - "Prompt ID -> Task ID"
+    - "Task ID -> Requirement ID"
+    - "Task ID -> Acceptance Criteria ID"
+    - "Prompt ID -> Validation/Test ID"
+    - "Prompt ID -> Architecture Component or Module"
+    - "Prompt ID -> Data Artifact, if applicable"
+    - "Prompt ID -> Security/Privacy Constraint, if applicable"
+    - "Prompt ID -> Expected Evidence"
+    - "Prompt ID -> Stage 11 Result Artifact Path"
+
+  prohibited_links:
+    - "Do not link prompts to unapproved task cards as executable scope."
+    - "Do not invent requirement, acceptance criteria, or test IDs silently."
+    - "Do not link Stage 11 to prompt-writing chat history."
+    - "Do not make downstream stages depend on internal notes or unapproved drafts."
+
+classification_rules:
+  approved_decision:
+    rule: "Only explicit human approval can create an approved decision."
+    examples:
+      - "PROMPT-001 through PROMPT-012 are approved for Stage 11 execution."
+      - "Stage 11 must run prompts sequentially in the listed dependency order."
+      - "No implementation prompt may change authentication behavior unless explicitly scoped."
+
+  decision_candidate:
+    rule: "Agent recommendations awaiting human approval must be marked as decision candidates."
+    examples:
+      - "Split TASK-014 into PROMPT-014A and PROMPT-014B because it crosses backend API and UI state management."
+      - "Group TASK-021 and TASK-022 because they modify the same validation boundary."
+
+  working_assumption:
+    rule: "Temporary beliefs needed for progress must remain assumptions until confirmed."
+    examples:
+      - "Stage 11 can use the validation commands listed in 08_validation_commands.md."
+      - "Prompt execution order follows 09_dependency_order.md unless explicitly changed."
+
+  open_question:
+    rule: "Unresolved issues that may affect implementation must be recorded as open questions."
+    examples:
+      - "Which command should be used for E2E validation in CI?"
+      - "Should TASK-009 modify only backend validation or also frontend error handling?"
+
+  rejected_option:
+    rule: "Explicitly rejected or superseded options must be recorded and not revived unless reopened."
+    examples:
+      - "Do not create one large implementation prompt for all MVP tasks."
+      - "Do not allow Stage 11 to execute prompts marked Draft or Blocked."
+
+  recommendation:
+    rule: "Recommendations are not decisions and must not be recorded as approved."
+
+approval_gate:
+  required: true
+  decisions_to_approve:
+    - "Approve, reject, or revise the implementation prompt set."
+    - "Approve prompt execution order."
+    - "Approve task splitting or prompt grouping."
+    - "Approve allowed change scope and forbidden changes for each prompt."
+    - "Approve security/privacy-sensitive implementation constraints."
+  assumptions_to_confirm:
+    - "Assumptions used to write prompts."
+    - "Inferred or incomplete validation commands."
+    - "Tool-specific execution assumptions."
+    - "Prompt grouping or splitting assumptions."
+  open_questions_to_resolve:
+    - "Blockers that prevent safe Stage 11 execution."
+    - "Missing test or evidence expectations."
+    - "Unclear file scope, task ownership, or module boundaries."
+    - "Unresolved security, privacy, or data-handling constraints."
+  risks_to_review:
+    - "Prompt is too broad for one coding-agent session."
+    - "Prompt may cause architecture drift."
+    - "Prompt may cause data model drift."
+    - "Prompt may weaken tests, security, or privacy controls."
+    - "Prompt relies on unapproved or draft source artifacts."
+  artifacts_ready_for_review:
+    - "/workflow/10_prompts/10_implementation_prompts.md"
+    - "/workflow/10_prompts/10_prompt_handoff_packets.md"
+    - "/workflow/10_prompts/result.md"
+    - "conditional artifacts created during execution"
+
+validation:
+  checklist:
+    - "All approved task cards were reviewed."
+    - "Every generated prompt has a Prompt ID."
+    - "Every prompt links to a Task ID."
+    - "Every prompt links to requirements and acceptance criteria when available."
+    - "Every prompt includes allowed change scope."
+    - "Every prompt includes forbidden changes."
+    - "Every prompt includes files to inspect first."
+    - "Every prompt includes required tests."
+    - "Every prompt includes commands to run or records a missing command gap."
+    - "Every prompt defines expected evidence."
+    - "Every prompt defines output files to update."
+    - "Every prompt includes context_packet.md update instructions."
+    - "Every prompt includes stop conditions."
+    - "Prompt execution order is clear."
+    - "Prompt readiness issues are recorded."
+    - "Security/privacy constraints are carried into relevant prompts."
+    - "Migration/rollback instructions are carried into relevant prompts."
+    - "Stage 11 handoff is clear enough for a fresh agent session."
+    - "Human approval gate is explicit."
+
+  failure_conditions:
+    - "Stage 9 task cards are missing."
+    - "Task cards are not approved and draft prompt writing was not explicitly allowed."
+    - "Task cards are too broad or ambiguous."
+    - "Required tests or validation commands are missing."
+    - "Architecture or data artifacts conflict with task cards."
+    - "Security/privacy constraints are unresolved."
+    - "Source artifacts are superseded or rejected."
+    - "Prompt execution order cannot be determined safely."
+  blocker_report_required: true
+  blocker_report_fields:
+    - blocking_issue
+    - why_it_matters
+    - affected_task_cards_or_prompts
+    - affected_artifacts_or_stages
+    - safe_partial_work_completed
+    - human_decision_needed
+
+prohibited_actions:
+  - "Do not implement code."
+  - "Do not edit production source files."
+  - "Do not run tests and claim implementation evidence."
+  - "Do not create one giant prompt for all tasks unless explicitly requested and marked as risky."
+  - "Do not convert unapproved task cards into approved implementation scope."
+  - "Do not omit forbidden changes."
+  - "Do not omit required tests."
+  - "Do not omit evidence expectations."
+  - "Do not hide missing validation commands."
+  - "Do not silently change task order."
+  - "Do not revive rejected implementation approaches."
+  - "Do not use context_packet.md as the only source of truth."
+  - "Do not overwrite approved artifacts without approval."
+  - "Do not update DECISIONS.md without explicit human approval."
+  - "Do not treat tool-specific instructions as architecture decisions."
+  - "Do not add project-specific implementation details while designing reusable prompts."
+
+specialization_hooks:
+  allowed: true
+  examples:
+    - name: "web_saas"
+      may_add:
+        - "route-level constraints"
+        - "API endpoint constraints"
+        - "auth/session constraints"
+        - "browser/E2E validation instructions"
+    - name: "internal_tool"
+      may_add:
+        - "operator workflow constraints"
+        - "admin-only safety constraints"
+        - "audit/manual override notes"
+    - name: "mobile_app"
+      may_add:
+        - "platform-specific prompt variants"
+        - "device permission constraints"
+        - "offline/sync boundaries"
+        - "app build validation notes"
+    - name: "ai_data_product"
+      may_add:
+        - "dataset handling constraints"
+        - "model evaluation prompts"
+        - "reproducibility requirements"
+        - "data leakage checks"
+        - "human review requirements"
+    - name: "regulated_security_sensitive"
+      may_add:
+        - "compliance constraints"
+        - "audit log constraints"
+        - "privacy-preserving implementation rules"
+        - "security test evidence requirements"
+        - "stronger stop conditions"
+    - name: "brownfield_legacy"
+      may_add:
+        - "regression baseline checks"
+        - "compatibility constraints"
+        - "no-touch legacy areas"
+        - "migration-safe prompt boundaries"
+  must_not_change:
+    - "approval_rules"
+    - "artifact_contract"
+    - "assumption_handling"
+    - "traceability_rules"
+    - "stage_boundaries"
+
+tool_wrapper_hooks:
+  allowed:
+    - "file_creation_commands"
+    - "save_locations"
+    - "sandbox_rules"
+    - "review_workflow"
+    - "command_invocation_conventions"
+    - "output_capture_conventions"
+  must_not_change:
+    - "stage_reasoning"
+    - "approval_rules"
+    - "artifact_contract"
+    - "assumption_handling"
+    - "traceability_rules"
+    - "stage_boundaries"
+    - "source_of_truth_rules"
+    - "evidence_expectations"
+
+split_policy:
+  current_mode: "single compact stage-level SKILL"
+  split_only_if:
+    - "prompt readiness analysis becomes large enough to require separate review"
+    - "prompt authoring and handoff packet generation need separate execution sessions"
+    - "project-type-specific prompt rules make the SKILL unstable"
+    - "a finalizer is needed to consolidate outputs from multiple internal prompt-writing sub-skills"
+  downstream_dependency_rule: "Stage 11 depends only on approved official Stage 10 artifacts, not internal sub-skill outputs."

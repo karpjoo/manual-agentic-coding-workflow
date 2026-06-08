@@ -1,0 +1,520 @@
+contract_version: 1.0.0
+skill:
+  name: 07_mvp_release_slicing
+  stage: 07 MVP Scope & Release Slicing
+  title: MVP Scope & Release Slicing
+  skill_path: /skills/07_mvp_release_slicing/SKILL.md
+  readme_path: /skills/07_mvp_release_slicing/README.md
+  primary_output: /workflow/07_mvp_release/result.md
+  requires_human_approval: true
+  internal_split: true
+purpose:
+  summary: Orchestrate Stage 7 as a split package that defines MVP scope, release slices, out-of-scope items, and Stage 8 handoff.
+  core_question: What is the smallest coherent MVP, what is deferred or out of scope, and what release order should be approved before validation planning?
+stage_contract:
+  public_interface: true
+  downstream_depends_on:
+  - approved_stage_artifacts
+  downstream_must_not_depend_on:
+  - internal_subskill_outputs
+  - subskill_folder_names
+  - prompt_history
+  - unapproved_drafts
+  previous_stage: 06 Data Design
+  next_stage: 08 Test Strategy & Validation Harness
+subskills:
+  execution_order:
+  - id: 07a
+    name: scope_input_review
+    path: /skills/07_mvp_release_slicing/07a_scope_input_review/SKILL.md
+  - id: 07b
+    name: mvp_scope_classification
+    path: /skills/07_mvp_release_slicing/07b_mvp_scope_classification/SKILL.md
+  - id: 07c
+    name: release_slicing_dependency
+    path: /skills/07_mvp_release_slicing/07c_release_slicing_dependency/SKILL.md
+  - id: 07d
+    name: out_of_scope_deferral_risk
+    path: /skills/07_mvp_release_slicing/07d_out_of_scope_deferral_risk/SKILL.md
+  - id: 07e
+    name: mvp_release_finalizer
+    path: /skills/07_mvp_release_slicing/07e_mvp_release_finalizer/SKILL.md
+  finalizer_required: true
+input_contract:
+  always_read:
+  - path: /workflow/context/artifact_manifest.yml
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/context_packet.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/DECISIONS.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/APPROVAL_LOG.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/ASSUMPTIONS.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/01_goal/01_service_goal.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/03_requirements/03_requirements.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/03_requirements/03_acceptance_criteria.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/03_requirements/03_traceability_matrix.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/04_domain/04_domain_model.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/04_domain/04_business_rules_invariants.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/05_architecture/05_architecture_plan.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/05_architecture/05_module_boundaries.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/05_architecture/05_architecture_decisions.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/06_data/06_conceptual_data_model.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: true
+  - path: /workflow/06_data/result.md
+    required: true
+    purpose: Stage-level source context for MVP and release slicing.
+    source_of_truth: true
+    approval_required: true
+  read_if_applicable:
+  - path: /workflow/02_stakeholders_risk/02_stakeholders.md
+    condition: Stakeholder or actor priority affects MVP scope.
+    purpose: Use role and stakeholder priority when classifying MVP scope.
+  - path: /workflow/02_stakeholders_risk/02_risk_privacy_screening.md
+    condition: Security, privacy, compliance, personal data, sensitive data, external API, or LLM transfer concerns affect release order.
+    purpose: Identify non-deferrable safety and compliance scope.
+  - path: /workflow/04_domain/04_ubiquitous_language.md
+    condition: Scope item names or release slice names require terminology alignment.
+    purpose: Keep scope language consistent with the domain language.
+  - path: /workflow/04_domain/04_bounded_contexts.md
+    condition: Release slices may cross bounded contexts.
+    purpose: Avoid unsafe cross-context release boundaries.
+  - path: /workflow/04_domain/04_domain_events.md
+    condition: Event-driven workflows affect sequencing.
+    purpose: Identify workflow and integration dependencies.
+  - path: /workflow/05_architecture/05_api_contracts.md
+    condition: The system exposes APIs.
+    purpose: Identify API dependencies and public contract constraints.
+  - path: /workflow/05_architecture/05_integration_contracts.md
+    condition: External integrations exist or are proposed.
+    purpose: Sequence integration-dependent scope.
+  - path: /workflow/05_architecture/05_authz_model.md
+    condition: Roles or permissions affect MVP safety.
+    purpose: Identify authorization scope that cannot be deferred.
+  - path: /workflow/06_data/06_logical_schema.md
+    condition: Persistent data exists.
+    purpose: Map requirements to data design dependencies.
+  - path: /workflow/06_data/06_data_security_rules.md
+    condition: Data access control affects release safety.
+    purpose: Identify data security rules required in MVP.
+  - path: /workflow/06_data/06_migration_plan.md
+    condition: Migration affects release order.
+    purpose: Sequence migration-dependent scope.
+  - path: /workflow/00_intake/00_existing_context_review.md
+    condition: This is a brownfield or legacy project.
+    purpose: Respect compatibility, regression, and migration constraints.
+  do_not_read_by_default:
+  - path_or_pattern: full historical agent logs
+    reason: Avoid context pollution and dependence on prompt history.
+  - path_or_pattern: superseded artifacts
+    reason: Do not use outdated artifacts as current truth.
+  - path_or_pattern: unrelated previous stage drafts
+    reason: Only approved or explicitly requested drafts may affect scope.
+  - path_or_pattern: implementation source code
+    reason: Stage 7 is planning, not implementation, unless brownfield context requires inspection.
+  - path_or_pattern: /workflow/08_test_strategy/**
+    reason: Stage 8 outputs must not drive Stage 7 scope unless revising an existing plan.
+  - path_or_pattern: /workflow/09_tasks/**
+    reason: Task breakdown belongs to Stage 9.
+  missing_input_handling:
+    missing_required_input: Report the missing input, explain why it matters, mark it blocking or non-blocking, and stop if final MVP scope would be unsafe.
+    missing_stage_input: Create only safe partial work, such as an input inventory or conflict report, if stage-critical inputs are unavailable.
+    no_project_context: Stop and request the minimum approved upstream artifacts or explicit permission for exploratory slicing.
+    conflicting_inputs: Report the conflict and affected artifacts; do not silently resolve scope, architecture, data, privacy, or release conflicts.
+    draft_or_unapproved_inputs: Use only if explicitly instructed; label the result as draft and prevent downstream reliance until approval.
+user_directives:
+  path: /workflow/07_mvp_release/USER_DIRECTIVES.md
+  required_if_exists: true
+  handling_rules:
+  - Read before executing the SKILL.
+  - Classify directives as approval, correction, preference, rejection, scope change, constraint, question, or new input.
+  - Do not treat every directive as a globally approved decision.
+  - Report conflicts with approved decisions.
+  - Do not modify USER_DIRECTIVES.md unless explicitly instructed.
+output_contract:
+  mandatory_artifacts:
+  - path: /workflow/07_mvp_release/07_mvp_scope.md
+    purpose: Defines MVP scope classification, supporting scope, risks, assumptions, and approval candidates.
+    required: true
+    approval_required: true
+    status_values: &id001
+    - Draft
+    - Approved
+    - Needs Review
+    required_sections:
+    - Stage Status
+    - MVP Definition Summary
+    - Scope Classification Method
+    - MVP Must-Have Scope
+    - MVP Supporting / Enabling Scope
+    - Should-Have Candidates
+    - Could-Have Candidates
+    - Later Release Items
+    - Won't / Non-Scope Items
+    - Security / Privacy / Compliance Scope Notes
+    - Operational / Deployment Scope Notes
+    - Scope Risks
+    - Decision Candidates
+    - Working Assumptions
+    - Open Questions
+    - Human Approval Required
+  - path: /workflow/07_mvp_release/07_release_slices.md
+    purpose: Defines coherent release slices, dependency-driven ordering, risks, and Stage 8 validation handoff.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Release Strategy Summary
+    - Release Slice Overview
+    - Release Slice Details
+    - Dependency-Driven Ordering
+    - Deferred Requirement Impact
+    - Release Risks
+    - Stage 8 Validation Handoff
+    - Human Approval Required
+  - path: /workflow/07_mvp_release/07_out_of_scope.md
+    purpose: Records deferred items, explicit non-scope items, rejected options, and scope creep watchlist.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Purpose
+    - Explicit Non-Scope Items
+    - Deferred but Not Rejected Items
+    - Rejected Options to Record
+    - Scope Creep Watchlist
+    - Open Questions Affecting Scope
+    - Human Approval Required
+  - path: /workflow/07_mvp_release/07_scope_traceability_matrix.md
+    purpose: Links goals, requirements, acceptance criteria, scope categories, release slices, and Stage 8 validation handoff.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Scope Traceability Matrix
+    - Traceability Gaps
+  - path: /workflow/07_mvp_release/result.md
+    purpose: Summarizes Stage 7 execution, outputs, decisions needed, assumptions, risks, traceability updates, and next step.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Task Summary
+    - Inputs Used
+    - Outputs Created or Updated
+    - MVP Scope Summary
+    - Release Slice Summary
+    - Out-of-Scope Summary
+    - Decision Candidates
+    - Working Assumptions
+    - Open Questions
+    - Risks and Constraints
+    - Rejected or Superseded Options
+    - Traceability Updates
+    - N/A Items
+    - Stage 8 Handoff Notes
+    - Human Approval Required
+    - Recommended Next Step
+  conditional_artifacts:
+  - path: /workflow/07_mvp_release/07_release_risk_register.md
+    condition: Release sequencing introduces significant business, technical, security, privacy, operational, migration, or delivery risks.
+    purpose: Records release risks, severity, likelihood, mitigation, and review needs.
+    n_a_record_required: true
+    approval_required: true
+    status_values: *id001
+  - path: /workflow/07_mvp_release/07_dependency_map.md
+    condition: Release slices have non-trivial dependencies across requirements, bounded contexts, modules, APIs, integrations, data models, or migrations.
+    purpose: Maps dependencies that affect release ordering.
+    n_a_record_required: true
+    approval_required: true
+    status_values: *id001
+  - path: /workflow/07_mvp_release/07_scope_tradeoff_analysis.md
+    condition: Multiple plausible MVP boundaries require human comparison.
+    purpose: Compares competing MVP boundary options and trade-offs.
+    n_a_record_required: true
+    approval_required: true
+    status_values: *id001
+  - path: /workflow/07_mvp_release/07_specialization_scope_notes.md
+    condition: A project-type specialization adds scope concerns such as AI evaluation, mobile release constraints, regulated gates, or brownfield migration constraints.
+    purpose: Records specialization-driven scope notes.
+    n_a_record_required: true
+    approval_required: true
+    status_values: *id001
+  internal_working_artifacts:
+  - path: /workflow/07_mvp_release/_internal/07a_scope_input_review.md
+    purpose: Input and source artifact review for internal handoff.
+    downstream_dependency_allowed: false
+  - path: /workflow/07_mvp_release/_internal/07a_scope_inventory.md
+    purpose: Requirement and dependency inventory for internal handoff.
+    downstream_dependency_allowed: false
+  - path: /workflow/07_mvp_release/_internal/07b_mvp_scope_classification_notes.md
+    purpose: Scope classification notes for internal handoff.
+    downstream_dependency_allowed: false
+  - path: /workflow/07_mvp_release/_internal/07c_release_slicing_notes.md
+    purpose: Release slicing notes for internal handoff.
+    downstream_dependency_allowed: false
+  - path: /workflow/07_mvp_release/_internal/07d_deferral_risk_notes.md
+    purpose: Deferral and risk notes for internal handoff.
+    downstream_dependency_allowed: false
+  n_a_record:
+    required: true
+    required_fields:
+    - artifact
+    - why_not_applicable
+    - revisit_if
+context_updates:
+  files_to_update:
+  - path: /workflow/context/context_packet.md
+    condition: Finalizer always updates or prepares for Stage 8.
+    update_rule: Include only the minimum operational context needed by Stage 8.
+  - path: /workflow/context/ASSUMPTIONS.md
+    condition: Update if working assumptions exist.
+    update_rule: Record assumptions without treating them as decisions.
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    condition: Update if unresolved questions exist.
+    update_rule: Record questions that may affect later stages.
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    condition: Update if options were explicitly rejected or superseded.
+    update_rule: Do not revive rejected options unless explicitly reopened.
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    condition: Update if traceability links are introduced or changed.
+    update_rule: Use stable IDs and preserve existing links.
+  context_packet:
+    path: /workflow/context/context_packet.md
+    purpose: Prepare minimal context for Stage 8 Test Strategy & Validation Harness.
+    next_stage: 08 Test Strategy & Validation Harness
+    required_sections:
+    - Current Project State
+    - Approved Decisions
+    - Working Assumptions
+    - Open Questions
+    - Rejected / Superseded Options
+    - Constraints That Must Not Be Violated
+    - Key Context for Next Stage
+    - Required Inputs for Next Stage
+    - Do Not Do
+traceability:
+  id_conventions:
+    goals: G-001, G-002
+    requirements: REQ-001, REQ-002
+    acceptance_criteria: AC-001, AC-002
+    scope_items: SCOPE-001, SCOPE-002
+    release_slices: REL-001, REL-002
+    deferred_items: DEF-001, DEF-002
+    non_scope_items: NON-SCOPE-001, NON-SCOPE-002
+    risks: RISK-001, RISK-002
+  required_links:
+  - Service Goal -> Requirement
+  - Requirement -> Acceptance Criteria
+  - Requirement -> Scope Category
+  - Requirement -> Release Slice
+  - Release Slice -> Stage 8 Validation Handoff
+  conditional_links:
+  - Requirement -> Domain Invariant
+  - Requirement -> Module / API / Integration
+  - Requirement -> Data Model / Security Rule / Migration
+  - Requirement -> Release Dependency
+  prohibited_links:
+  - Do not create task or implementation evidence links during Stage 7.
+  - Do not link internal sub-SKILL artifacts as downstream source of truth.
+classification_rules:
+  approved_decision:
+    rule: Only explicit human approval can create an approved decision.
+    examples:
+    - 'Approved: MVP includes only the selected Must scope items.'
+    - 'Approved: Release 1 excludes advanced reporting.'
+  decision_candidate:
+    rule: Agent recommendations awaiting human approval must be marked as decision candidates.
+  working_assumption:
+    rule: Temporary beliefs needed for progress must remain assumptions until confirmed.
+  open_question:
+    rule: Unresolved issues that may affect scope, validation, security, data, or release order must be recorded as open questions.
+  rejected_option:
+    rule: Explicitly rejected or superseded options must be recorded and not revived unless reopened.
+  recommendation:
+    rule: Recommendations are not decisions and must not be recorded as approved.
+approval_gate:
+  required: true
+  decisions_to_approve:
+  - MVP scope items
+  - MVP supporting/enabling scope items
+  - Deferred requirements
+  - Explicit out-of-scope items
+  - Release slice order
+  - Scope trade-offs
+  - Security/privacy/compliance items required in MVP
+  assumptions_to_confirm:
+  - MVP target usage context
+  - Acceptable manual workarounds
+  - Acceptable deferrals
+  - Operational assumptions
+  open_questions_to_resolve:
+  - Questions that may change MVP scope
+  - Questions that may block Stage 8 validation planning
+  - Questions affecting security, privacy, data, or compliance
+  risks_to_review:
+  - Deferral risks
+  - Scope creep risks
+  - Architecture or data dependency risks
+  - Security/privacy risks
+  - Operational readiness risks
+  - Validation risks
+  artifacts_ready_for_review:
+  - /workflow/07_mvp_release/07_mvp_scope.md
+  - /workflow/07_mvp_release/07_release_slices.md
+  - /workflow/07_mvp_release/07_out_of_scope.md
+  - /workflow/07_mvp_release/07_scope_traceability_matrix.md
+  - /workflow/07_mvp_release/result.md
+validation:
+  checklist:
+  - Official artifacts match the Stage 7 public contract.
+  - Sub-SKILL sequence has been completed or equivalent draft artifacts exist.
+  - MVP scope and release slices are traceable to requirements and acceptance criteria.
+  - Deferred and non-scope items are separated.
+  - Stage 8 handoff is clear.
+  - Human approval gate is explicit.
+  failure_conditions:
+  - Approved requirements or acceptance criteria are missing.
+  - Architecture or data design conflicts with MVP scope.
+  - Security/privacy constraints make proposed scope unsafe.
+  - Artifact approval status cannot be determined.
+  - Stage 7 artifacts contradict each other.
+  blocker_report_required: true
+  blocker_report_fields:
+  - blocking_issue
+  - why_it_matters
+  - affected_artifacts_or_stages
+  - safe_partial_work_completed
+  - human_decision_needed
+prohibited_actions:
+- Do not execute Stage 7 while creating this support contract.
+- Do not create project artifacts under /workflow from this contract.
+- Do not create implementation tasks.
+- Do not write detailed tests.
+- Do not redesign architecture or data models.
+- Do not treat deferred items as rejected.
+- Do not update DECISIONS.md without explicit human approval.
+specialization_hooks:
+  allowed: true
+  examples:
+  - name: web_saas
+    may_add:
+    - subscription tier slicing
+    - tenant isolation constraints
+    - private beta versus public launch scope
+  - name: internal_tool
+    may_add:
+    - operator workflow priority
+    - manual workaround acceptability
+    - organizational rollout slices
+  - name: mobile_app
+    may_add:
+    - platform-specific release slicing
+    - offline/sync deferral decisions
+    - app store constraints
+  - name: ai_data_product
+    may_add:
+    - dataset availability dependencies
+    - evaluation metric readiness
+    - model review requirements
+  - name: regulated_security_sensitive
+    may_add:
+    - compliance-driven MVP minimums
+    - audit logging requirements
+    - privacy controls that cannot be deferred
+  - name: brownfield_legacy
+    may_add:
+    - migration-first slice
+    - compatibility scope
+    - regression-sensitive slicing
+  must_not_change:
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries
+tool_wrapper_hooks:
+  allowed:
+  - file_creation_commands
+  - save_locations
+  - sandbox_rules
+  - review_workflow
+  - command_invocation_conventions
+  must_not_change:
+  - stage_reasoning
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries

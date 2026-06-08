@@ -1,0 +1,414 @@
+# Artifact Contract for Stage 0 Project Intake / Existing Context Review
+#
+# Scope:
+# - This file belongs to the reusable skill package at /skills/00_project_intake/.
+# - It is a design-time contract, not a runtime execution artifact.
+# - It defines what Stage 0 must create or update during project execution.
+# - Actual generated artifacts and their approval/supersession status are recorded in
+#   /workflow/context/artifact_manifest.yml during a project run.
+
+schema_version: "1.0.0"
+contract_type: "stage_artifact_contract"
+status: "draft"
+
+stage:
+  id: "00_project_intake"
+  number: 0
+  name: "Project Intake / Existing Context Review"
+  workflow_folder: "/workflow/00_intake"
+  context_folder: "/workflow/context"
+  reusable_skill_folder: "/skills/00_project_intake"
+  skill_path: "/skills/00_project_intake/SKILL.md"
+  readme_path: "/skills/00_project_intake/README.md"
+
+purpose: >-
+  Establish the trustworthy starting context for a project before service goal,
+  stakeholder/risk, requirements, domain modeling, architecture, data design,
+  task breakdown, or implementation stages begin.
+
+contract_principles:
+  - "Downstream stages depend on approved artifacts, not on chat history."
+  - "Agent output is not an approved decision unless explicitly approved by the human developer."
+  - "Assumptions, decision candidates, approved decisions, open questions, rejected options, and risks must be separated."
+  - "Conditional artifacts that are not applicable must be recorded with an N/A rationale."
+  - "context_packet.md is a navigation layer for the next stage, not the sole source of truth."
+
+# This section is intentionally concise.
+# The authoritative input contract remains in SKILL.md.
+# README.md explains these inputs for human users.
+runtime_input_summary:
+  minimum_user_input:
+    one_of:
+      - "A short project idea or problem statement."
+      - "A repository/project folder to inspect."
+      - "A /workflow/00_intake/USER_DIRECTIVES.md file describing known project context."
+  always_check_if_present:
+    - path: "/workflow/00_intake/USER_DIRECTIVES.md"
+      purpose: "Stage-local human instructions, preferences, corrections, questions, approvals, or rejections."
+    - path: "/workflow/00_intake/review_notes.md"
+      purpose: "Human review comments from a previous Stage 0 run."
+    - path: "/workflow/context/artifact_manifest.yml"
+      purpose: "Existing artifact status, approval, supersession, and source relationships."
+    - path: "/workflow/context/context_packet.md"
+      purpose: "Current operational workflow context, if this is a rerun or continuation."
+    - path: "/workflow/context/DECISIONS.md"
+      purpose: "Human-approved decisions only."
+    - path: "/workflow/context/ASSUMPTIONS.md"
+      purpose: "Known working assumptions from previous runs, if any."
+    - path: "/workflow/context/OPEN_QUESTIONS.md"
+      purpose: "Unresolved questions from previous runs, if any."
+    - path: "/workflow/context/REJECTED_OPTIONS.md"
+      purpose: "Rejected or superseded options that must not be revived without explicit approval."
+    - path: "/workflow/context/TRACEABILITY_MATRIX.md"
+      purpose: "Existing traceability records, if initialized."
+    - path: "/workflow/context/APPROVAL_LOG.md"
+      purpose: "Explicit approval history, if the workflow uses approval logging."
+  read_if_applicable_examples:
+    - path: "README.md"
+      condition: "A repository or project folder exists."
+    - path: "docs/ or documentation/ or design/ or planning/ or product/ or specs/"
+      condition: "Project documentation folders exist."
+    - path: "package.json, pyproject.toml, requirements.txt, pubspec.yaml, go.mod, pom.xml, build.gradle, Cargo.toml"
+      condition: "Technology stack detection is needed."
+    - path: "firebase.json, firestore.rules, firestore.indexes.json"
+      condition: "Firebase is present or mentioned."
+    - path: "vercel.json, netlify.toml, Dockerfile, docker-compose.yml, k8s/, terraform/, infra/"
+      condition: "Deployment or infrastructure context exists."
+    - path: "tests/, e2e/, integration test folders"
+      condition: "An existing codebase has tests or validation assets."
+    - path: "dataset description, data dictionary, labeling guide"
+      condition: "The project may be an AI/data product or research tool."
+    - path: "compliance, privacy, security, or legal notes"
+      condition: "The project may handle personal, sensitive, regulated, external, or confidential data."
+  do_not_read_by_default:
+    - "Full source code tree when only high-level intake is needed."
+    - "Raw logs unless debugging or incident review is explicitly in scope."
+    - "Large datasets."
+    - "Generated build artifacts."
+    - "Private secrets or local environment files containing credentials."
+    - "Unrelated previous project artifacts."
+
+mandatory_artifacts:
+  - id: "stage0_project_intake"
+    path: "/workflow/00_intake/00_project_intake.md"
+    format: "markdown"
+    primary: true
+    approval_required: true
+    owner: "stage_00_project_intake"
+    purpose: >-
+      Records project type, project profile candidates, starting context,
+      fixed constraints, decision candidates, approved decisions, assumptions,
+      open questions, early risks, forbidden change areas, specialization hooks,
+      and recommended next step.
+    required_sections:
+      - "Intake Summary"
+      - "Source Inputs Reviewed"
+      - "Project Type Classification"
+      - "Project Profile Candidates"
+      - "Existing Context Inventory"
+      - "Explicitly Approved Decisions"
+      - "Decision Candidates Needing Approval"
+      - "Working Assumptions"
+      - "Open Questions"
+      - "Fixed Constraints"
+      - "Forbidden Change Areas"
+      - "Early Risk Signals"
+      - "Specialization Hooks to Consider"
+      - "Recommended Next Step"
+    source_of_truth_after_approval: true
+
+  - id: "stage0_result"
+    path: "/workflow/00_intake/result.md"
+    format: "markdown"
+    primary: false
+    approval_required: false
+    owner: "stage_00_project_intake"
+    purpose: >-
+      Summarizes this execution: inputs used, outputs created or updated,
+      classification summary, key findings, decision candidates, working
+      assumptions, open questions, risks, N/A records, context packet updates,
+      approval needs, and recommended next step.
+    required_sections:
+      - "Task Summary"
+      - "Inputs Used"
+      - "Outputs Created or Updated"
+      - "Project Classification Summary"
+      - "Key Findings"
+      - "Decision Candidates"
+      - "Working Assumptions"
+      - "Open Questions"
+      - "Risks and Constraints"
+      - "N/A Records"
+      - "Context Packet Update Summary"
+      - "Human Approval Required"
+      - "Recommended Next Step"
+    source_of_truth_after_approval: false
+
+  - id: "context_packet"
+    path: "/workflow/context/context_packet.md"
+    format: "markdown"
+    primary: false
+    approval_required: false
+    owner: "workflow_context"
+    purpose: >-
+      Provides the minimum operational context required by the next stage or
+      next recommended skill. It must point to source artifacts rather than
+      duplicating full artifact content.
+    required_sections:
+      - "Current Project State"
+      - "Approved Decisions"
+      - "Working Assumptions"
+      - "Open Questions"
+      - "Rejected / Superseded Options"
+      - "Constraints That Must Not Be Violated"
+      - "Key Context for Next Stage"
+      - "Required Inputs for Next Stage"
+      - "Do Not Do"
+    source_of_truth_after_approval: false
+
+conditional_artifacts:
+  - id: "existing_context_review"
+    path: "/workflow/00_intake/00_existing_context_review.md"
+    format: "markdown"
+    condition: >-
+      Create when the project has an existing codebase, existing documentation,
+      existing tests, existing deployment, production data, migration context,
+      compatibility constraints, maintenance/extension work, or forbidden change areas.
+    approval_required: true
+    owner: "stage_00_project_intake"
+    purpose: >-
+      Inventories existing system context, codebase/documentation/test/data/
+      deployment assets, compatibility constraints, fragile areas, areas not to
+      change, and inputs later stages must respect.
+    required_sections:
+      - "Review Scope"
+      - "Existing System Summary"
+      - "Existing Codebase Inventory"
+      - "Existing Documentation Inventory"
+      - "Existing Tests and Validation"
+      - "Existing Data / Database / Dataset Context"
+      - "Existing Deployment / Infrastructure Context"
+      - "Compatibility Constraints"
+      - "Areas That Must Not Be Changed"
+      - "Known Risks or Fragile Areas"
+      - "Required Inputs for Later Stages"
+      - "Open Questions for Human Review"
+    source_of_truth_after_approval: true
+
+  - id: "artifact_manifest"
+    path: "/workflow/context/artifact_manifest.yml"
+    format: "yaml"
+    condition: >-
+      Create or update when artifact tracking is enabled, when this file does
+      not yet exist, or when Stage 0 creates/updates artifacts whose status
+      should be tracked.
+    approval_required: false
+    owner: "workflow_context"
+    purpose: >-
+      Records actual artifact existence, status, approval state, supersession,
+      source artifact relationships, and review state during project execution.
+    source_of_truth_after_approval: true
+
+  - id: "assumptions"
+    path: "/workflow/context/ASSUMPTIONS.md"
+    format: "markdown"
+    condition: "Create or update when Stage 0 introduces or changes working assumptions."
+    approval_required: false
+    owner: "workflow_context"
+    purpose: "Records useful but unverified working assumptions."
+    source_of_truth_after_approval: false
+
+  - id: "open_questions"
+    path: "/workflow/context/OPEN_QUESTIONS.md"
+    format: "markdown"
+    condition: "Create or update when unresolved questions may affect later stages."
+    approval_required: false
+    owner: "workflow_context"
+    purpose: "Records unresolved questions and their downstream impact."
+    source_of_truth_after_approval: false
+
+  - id: "rejected_options"
+    path: "/workflow/context/REJECTED_OPTIONS.md"
+    format: "markdown"
+    condition: "Create or update when the human explicitly rejects or supersedes an option."
+    approval_required: false
+    owner: "workflow_context"
+    purpose: "Records rejected or superseded options that must not be revived unless explicitly reopened."
+    source_of_truth_after_approval: true
+
+  - id: "traceability_matrix"
+    path: "/workflow/context/TRACEABILITY_MATRIX.md"
+    format: "markdown"
+    condition: "Initialize or update only if intake-level traceability is being tracked."
+    approval_required: false
+    owner: "workflow_context"
+    purpose: >-
+      Preserves early traceability from user-provided sources to intake findings,
+      decision candidates, assumptions, open questions, constraints, and next-stage handoff items.
+    source_of_truth_after_approval: false
+
+  - id: "approval_log"
+    path: "/workflow/context/APPROVAL_LOG.md"
+    format: "markdown"
+    condition: "Update only when explicit human approval is provided and approval logging is enabled."
+    approval_required: false
+    owner: "workflow_context"
+    purpose: "Records explicit human approval events."
+    source_of_truth_after_approval: true
+
+n_a_record:
+  required: true
+  applies_to: "conditional_artifacts"
+  required_fields:
+    - "artifact_id"
+    - "path"
+    - "reason_not_applicable_now"
+    - "condition_that_would_make_it_applicable_later"
+  record_location:
+    - "/workflow/00_intake/result.md#N/A Records"
+    - "/workflow/00_intake/00_project_intake.md#Recommended Next Step or relevant artifact section"
+  example:
+    artifact_id: "existing_context_review"
+    path: "/workflow/00_intake/00_existing_context_review.md"
+    reason_not_applicable_now: "No existing codebase, deployment, production data, compatibility constraint, or forbidden change area has been provided."
+    condition_that_would_make_it_applicable_later: "User provides repository access, migration context, existing-system constraints, or forbidden change areas."
+
+artifact_status_expectations:
+  initial_status: "draft"
+  allowed_statuses:
+    - "draft"
+    - "ready_for_review"
+    - "approved"
+    - "superseded"
+    - "rejected"
+    - "blocked"
+    - "not_applicable"
+  approval_rule: >-
+    Do not mark any artifact as approved unless the human developer explicitly
+    approves it. Agent-generated artifacts are drafts or ready_for_review.
+
+artifact_manifest_update_rules:
+  create_if_missing: true
+  update_required_for:
+    - "Every mandatory artifact created or updated."
+    - "Every conditional artifact created or marked not applicable."
+    - "Every artifact whose approval, rejection, or supersession status changes."
+  minimum_manifest_fields:
+    - "id"
+    - "path"
+    - "stage"
+    - "status"
+    - "created_or_updated_by"
+    - "approval_required"
+    - "approved_by"
+    - "approved_at"
+    - "supersedes"
+    - "source_artifacts"
+    - "notes"
+
+next_context_rules:
+  default_next_stage:
+    id: "01_service_goal_definition"
+    path: "/skills/01_service_goal_definition/SKILL.md"
+    workflow_folder: "/workflow/01_goal"
+  alternative_next_steps:
+    - id: "codebase_context_review"
+      condition: "Run before Stage 1 when existing code, deployment, data, compatibility constraints, or forbidden change areas require deeper inspection."
+    - id: "intake_clarification"
+      condition: "Use when missing project description, conflicting source inputs, or blocking classification uncertainty prevents safe progress."
+  required_inputs_for_default_next_stage:
+    - path: "/workflow/00_intake/00_project_intake.md"
+      required: true
+      approval_preferred: true
+    - path: "/workflow/context/context_packet.md"
+      required: true
+      approval_preferred: false
+    - path: "/workflow/context/DECISIONS.md"
+      required: false
+      approval_preferred: true
+    - path: "/workflow/context/ASSUMPTIONS.md"
+      required: false
+      approval_preferred: false
+    - path: "/workflow/context/OPEN_QUESTIONS.md"
+      required: false
+      approval_preferred: false
+    - path: "/workflow/00_intake/00_existing_context_review.md"
+      required: false
+      approval_preferred: true
+      condition: "Read if the project is brownfield, migration, extension, maintenance, or has existing-system constraints."
+  context_packet_must_include:
+    - "Current stage, completed stages, and next recommended stage."
+    - "Only explicitly approved decisions in the Approved Decisions section."
+    - "Working assumptions that remain unconfirmed."
+    - "Open questions grouped by downstream impact when possible."
+    - "Rejected or superseded options, if any."
+    - "Constraints that must not be violated."
+    - "Minimal context needed by the next stage."
+    - "Required inputs for the next stage."
+    - "Do-not-do instructions for the next stage."
+
+approval_gate:
+  required: true
+  record_in_result: true
+  decisions_to_approve:
+    - "Project context type: greenfield, brownfield, prototype, research tool, extension, migration, maintenance, or other."
+    - "Project profile: MVP production, lightweight prototype, production system, regulated/security-sensitive, web SaaS, internal tool, mobile app, AI/data product, developer tooling, educational/learning project, or other."
+    - "Fixed technology stack, if any."
+    - "Existing documents, code, tests, data, deployment, or infrastructure to treat as source inputs."
+    - "Forbidden change areas."
+    - "Initial security, privacy, data, compliance, operational, or research constraints."
+    - "Whether to proceed to Stage 1 Service Goal Definition or perform deeper codebase-context review first."
+  assumptions_to_confirm_examples:
+    - "Assuming the project is greenfield."
+    - "Assuming the workflow should follow MVP production profile."
+    - "Assuming no existing codebase or production data exists."
+    - "Assuming no regulated or sensitive data is involved."
+    - "Assuming Stage 1 Service Goal Definition should be the next stage."
+
+validation_checks:
+  - id: "project_type_classified_or_gap_recorded"
+    description: "Project context type is identified, or the uncertainty is clearly recorded."
+  - id: "project_profile_classified_or_gap_recorded"
+    description: "Project profile is identified, or the uncertainty is clearly recorded."
+  - id: "existing_context_inventory_completed"
+    description: "Existing documents, code, tests, data, and deployment context are inventoried at intake depth."
+  - id: "existing_context_review_created_or_na"
+    description: "00_existing_context_review.md is created when applicable, otherwise an N/A record is present."
+  - id: "decisions_separated_from_assumptions"
+    description: "Approved decisions, decision candidates, assumptions, and open questions are clearly separated."
+  - id: "fixed_constraints_recorded"
+    description: "Fixed technology, scope, security/privacy, operational, and compatibility constraints are recorded when present."
+  - id: "forbidden_change_areas_recorded"
+    description: "Forbidden change areas are recorded when present."
+  - id: "early_risk_signals_recorded"
+    description: "Visible security, privacy, data, LLM/API, compliance, operational, and research risk signals are recorded."
+  - id: "no_downstream_design_started"
+    description: "The stage does not start requirements, architecture, data design, task planning, or implementation."
+  - id: "context_packet_is_minimal"
+    description: "context_packet.md contains minimal next-stage context and points to source artifacts."
+  - id: "human_approval_gate_present"
+    description: "Human approval items are clearly listed before proceeding."
+
+failure_handling:
+  blocking_conditions:
+    - "No project idea, problem statement, repository, or USER_DIRECTIVES.md exists and the user has not asked only for context inventory."
+    - "Conflicting explicit instructions affect scope, security, privacy, data, technology, forbidden change areas, or next-stage direction."
+    - "Brownfield/migration/maintenance work is requested but existing-system access or summary is unavailable."
+    - "Security/privacy-sensitive context is present but minimum constraints cannot be identified safely."
+  required_blocker_report_sections:
+    - "Blocking Issue"
+    - "Why It Matters"
+    - "Affected Artifacts or Stages"
+    - "Safe Partial Work Completed"
+    - "Human Decision Needed"
+
+anti_patterns:
+  - "Treating a vague project idea as an approved service goal."
+  - "Treating suggested technology as an approved stack."
+  - "Assuming greenfield when existing code, deployment, data, or compatibility constraints are mentioned."
+  - "Starting requirements, architecture, data design, task breakdown, or implementation during intake."
+  - "Reading the entire source tree by default."
+  - "Recording agent-inferred classification as an approved decision."
+  - "Using context_packet.md as the only source of truth."
+  - "Skipping N/A records for conditional artifacts."
+  - "Failing to identify applicable specialization hooks."

@@ -1,0 +1,1 @@
+# Artifact: 04 Ubiquitous Language

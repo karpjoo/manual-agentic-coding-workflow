@@ -1,0 +1,458 @@
+contract_version: 1.0.0
+skill:
+  name: 13_workflow_retrospective
+  stage: 13 Workflow Retrospective & Skill Improvement
+  title: Workflow Retrospective & Skill Improvement
+  skill_path: /skills/13_workflow_retrospective/SKILL.md
+  readme_path: /skills/13_workflow_retrospective/README.md
+  primary_output: /workflow/13_retrospective/result.md
+  requires_human_approval: true
+  internal_split: true
+purpose:
+  summary: Orchestrates the Stage 13 retrospective package and routes execution through evidence scoping, stage workflow review,
+    Agent failure pattern analysis, skill improvement backlog creation, and final consolidation.
+  core_question: Which workflow, prompt, context, artifact, approval, validation, and Agent-behavior issues should be preserved,
+    fixed, split, merged, removed, or promoted into reusable rules for future projects?
+stage_contract:
+  public_interface: true
+  previous_stage: 12_review_release_handoff
+  next_recommended_action: approved_skill_revision_workflow_experiment_or_next_project_intake
+  downstream_depends_on:
+  - approved_stage_artifacts
+  downstream_must_not_depend_on:
+  - internal_subskill_outputs
+  - subskill_folder_names
+  - prompt_history
+  - raw_chat_history
+  finalizer_required: true
+subskills:
+  execution_order:
+  - id: 13a
+    name: 13a_retrospective_scope_evidence
+    path: /skills/13_workflow_retrospective/13a_retrospective_scope_evidence/SKILL.md
+    purpose: Defines retrospective scope, included and excluded stages, evidence sources, and evidence strength before conclusions
+      are drawn.
+  - id: 13b
+    name: 13b_stage_workflow_review
+    path: /skills/13_workflow_retrospective/13b_stage_workflow_review/SKILL.md
+    purpose: Reviews completed workflow stages, artifact quality, context handoff, approval gates, traceability, validation,
+      DDD continuity, and security/privacy workflow behavior.
+  - id: 13c
+    name: 13c_agent_failure_pattern_analysis
+    path: /skills/13_workflow_retrospective/13c_agent_failure_pattern_analysis/SKILL.md
+    purpose: Identifies evidence-backed Agent strengths, repeated failure patterns, mixed patterns, one-off issues, insufficient
+      evidence items, and human judgment points.
+  - id: 13d
+    name: 13d_skill_improvement_backlog
+    path: /skills/13_workflow_retrospective/13d_skill_improvement_backlog/SKILL.md
+    purpose: Converts evidence-backed retrospective findings and Agent behavior patterns into reusable lessons, prioritized
+      skill improvement backlog items, and skill lifecycle recommendations.
+  - id: 13e
+    name: 13e_retrospective_finalizer
+    path: /skills/13_workflow_retrospective/13e_retrospective_finalizer/SKILL.md
+    purpose: Consolidates Stage 13 retrospective artifacts, validates evidence-backed findings, prepares result.md and context_packet.md,
+      records N/A cases, and presents the final human approval gate.
+input_contract:
+  always_read:
+  - path: /workflow/context/artifact_manifest.yml
+    required: false
+    purpose: Workflow context and source-of-truth status.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/context_packet.md
+    required: true
+    purpose: Workflow context and source-of-truth status.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/APPROVAL_LOG.md
+    required: false
+    purpose: Workflow context and source-of-truth status.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/DECISIONS.md
+    required: true
+    purpose: Workflow context and source-of-truth status.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/ASSUMPTIONS.md
+    required: true
+    purpose: Workflow context and source-of-truth status.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    required: true
+    purpose: Workflow context and source-of-truth status.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    required: true
+    purpose: Workflow context and source-of-truth status.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    required: true
+    purpose: Workflow context and source-of-truth status.
+    source_of_truth: true
+    approval_required: false
+  - path: /workflow/13_retrospective/USER_DIRECTIVES.md
+    required: false
+    purpose: Stage-local human instructions.
+    source_of_truth: false
+    approval_required: false
+  - path: /workflow/12_review_release_handoff/result.md
+    required: false
+    purpose: Release, review, and handoff evidence for final retrospective.
+    source_of_truth: true
+    approval_required: true
+  read_if_applicable:
+  - path: /workflow/00_intake/result.md
+    condition: The retrospective covers Stage 0 or full-workflow execution.
+    purpose: Stage 0 execution evidence.
+  - path: /workflow/01_goal/result.md through /workflow/12_review_release_handoff/result.md
+    condition: The retrospective covers the full workflow or needs stage-by-stage analysis.
+    purpose: Stage result summaries for workflow-level evidence.
+  - path: /workflow/*/review_notes.md
+    condition: Human review notes exist.
+    purpose: Human corrections, approvals, rejections, and review comments.
+  - path: /workflow/11_implementation_results/11_task_result_*.md
+    condition: Implementation behavior or TDD loop quality is in scope.
+    purpose: Task execution evidence.
+  - path: /workflow/11_implementation_results/11_test_evidence_*.md
+    condition: Test evidence or validation discipline is in scope.
+    purpose: Validation evidence.
+  - path: agent_session_logs/*
+    condition: Explicitly provided by the user and safe to inspect.
+    purpose: Optional raw Agent behavior evidence.
+  - path: ci_reports/*
+    condition: CI behavior, validation stability, or release evidence is in scope.
+    purpose: Optional validation and automation evidence.
+  do_not_read_by_default:
+  - path_or_pattern: raw source code files
+    reason: Stage 13 reviews workflow quality, not implementation internals, unless code evidence is explicitly needed.
+  - path_or_pattern: secrets, credentials, private keys, or environment files
+    reason: Unsafe and unnecessary for retrospective support-file execution.
+  - path_or_pattern: full raw Agent chat logs
+    reason: Too noisy and privacy-sensitive unless explicitly provided and needed.
+  - path_or_pattern: superseded or rejected artifacts
+    reason: Use only when drift, rejection, or supersession behavior is explicitly in scope.
+  - path_or_pattern: unrelated project documentation
+    reason: Avoid widening retrospective scope beyond workflow evidence.
+  missing_input_handling:
+    missing_required_input: Report the missing input, explain why it matters, and mark it blocking or non-blocking.
+    missing_stage_input: Continue only if the retrospective scope can be narrowed safely; otherwise produce a blocker report.
+    no_project_context: Classify the work as a skill-template or workflow-design retrospective rather than a project retrospective.
+    conflicting_inputs: Report conflicts and do not silently choose one source when approval, scope, evidence, or workflow
+      changes are affected.
+    draft_or_unapproved_inputs: Use as evidence only if clearly labeled Draft or Needs Review; do not treat as approved source
+      of truth.
+user_directives:
+  path: /workflow/13_retrospective/USER_DIRECTIVES.md
+  required_if_exists: true
+  handling_rules:
+  - Read before executing the SKILL.
+  - Classify directives as approval, correction, retrospective focus area, skill improvement request, workflow policy preference,
+    rejection, scope limitation, question, or additional evidence source.
+  - Do not treat every directive as a globally approved decision.
+  - Report conflicts with approved decisions.
+  - Do not modify USER_DIRECTIVES.md unless explicitly instructed.
+output_contract:
+  mandatory_artifacts:
+  - path: /workflow/13_retrospective/13_workflow_retrospective.md
+    purpose: Workflow retrospective scope, evidence map, stage-by-stage review, and cross-cutting findings.
+    required: true
+    approval_required: true
+    status_values: &id001
+    - Draft
+    - Approved
+    - Needs Review
+    required_sections:
+    - Retrospective Scope
+    - Evidence Sources Reviewed
+    - Executive Summary
+    - Stage-by-Stage Retrospective
+    - Artifact Quality Review
+    - Context Handoff Review
+    - Approval Gate Review
+    - Traceability Review
+    - TDD / Validation Review
+    - DDD / Domain Continuity Review
+    - Security / Privacy Review of the Workflow
+  - path: /workflow/13_retrospective/13_agent_failure_patterns.md
+    purpose: Evidence-backed analysis of Agent strengths, failure patterns, one-off issues, and human judgment points.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Summary
+    - Failure Pattern Index
+    - Detailed Patterns
+    - Agent Strengths
+    - Mixed Patterns
+    - Non-Patterns / One-Off Issues
+    - Insufficient Evidence Items
+    - Human Judgment Points
+  - path: /workflow/13_retrospective/13_skill_improvement_backlog.md
+    purpose: Prioritized skill improvement backlog and skill lifecycle recommendations.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Backlog Summary
+    - Priority Definitions
+    - Backlog Items
+    - Detailed Backlog Items
+    - Skill Lifecycle Recommendations
+  - path: /workflow/13_retrospective/13_reusable_lessons.md
+    purpose: Reusable lessons for future workflow, prompt, artifact, context, approval, testing, DDD, security, privacy, and
+      tooling improvements.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Reusable Workflow Rules
+    - Reusable Prompt / SKILL Design Rules
+    - Reusable Artifact Contract Lessons
+    - Reusable Context Management Lessons
+    - Reusable Approval Gate Lessons
+    - Reusable Testing / Validation Lessons
+    - Reusable DDD / Domain Lessons
+    - Reusable Security / Privacy Lessons
+    - Project-Specific Lessons Not Yet Generalized
+    - Tool-Specific Lessons
+  - path: /workflow/13_retrospective/result.md
+    purpose: Final Stage 13 summary, N/A records, traceability updates, and approval gate.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Task Summary
+    - Inputs Used
+    - Outputs Created or Updated
+    - Key Findings
+    - Decision Candidates
+    - Working Assumptions
+    - Open Questions
+    - Risks and Constraints
+    - Human Approval Required
+    - Recommended Next Step
+  - path: /workflow/context/context_packet.md
+    purpose: Minimal context for approved skill revision work, workflow experiments, or the next project intake.
+    required: true
+    approval_required: true
+    status_values: *id001
+    required_sections:
+    - Current Project State
+    - Approved Decisions
+    - Working Assumptions
+    - Open Questions
+    - Rejected / Superseded Options
+    - Constraints That Must Not Be Violated
+    - Key Context for Next Action
+    - Required Inputs for Next Action
+    - Do Not Do
+  conditional_artifacts:
+  - path: /workflow/13_retrospective/13_prompt_ambiguity_report.md
+    condition: Prompt ambiguity or SKILL wording ambiguity repeatedly affected execution.
+    purpose: Focused report on ambiguous prompt/SKILL wording and proposed fixes.
+    n_a_record_required: true
+  - path: /workflow/13_retrospective/13_context_management_review.md
+    condition: Context reset, handoff, or context_packet problems affected execution.
+    purpose: Focused review of context management and handoff problems.
+    n_a_record_required: true
+  - path: /workflow/13_retrospective/13_human_intervention_log.md
+    condition: Human correction, rejection, approval, or intervention patterns require focused analysis.
+    purpose: Evidence summary of where human judgment was essential.
+    n_a_record_required: true
+  - path: /workflow/13_retrospective/13_tooling_limits.md
+    condition: Tool limits, sandbox constraints, context limits, or command failures affected outcomes.
+    purpose: Separate tool/environment limits from SKILL design issues.
+    n_a_record_required: true
+  - path: /workflow/13_retrospective/13_skill_split_candidates.md
+    condition: A SKILL should be split, merged, deleted, or created based on retrospective findings.
+    purpose: Skill lifecycle candidates for future approved workflow work.
+    n_a_record_required: true
+  - path: /workflow/13_retrospective/13_next_workflow_experiment_plan.md
+    condition: Workflow changes should be tested before becoming reusable rules.
+    purpose: Plan for validating proposed workflow changes in a later project or experiment.
+    n_a_record_required: true
+  n_a_record:
+    required: true
+    required_fields:
+    - artifact
+    - why_not_applicable
+    - revisit_if
+  official_stage_artifacts:
+  - /workflow/13_retrospective/13_workflow_retrospective.md
+  - /workflow/13_retrospective/13_agent_failure_patterns.md
+  - /workflow/13_retrospective/13_skill_improvement_backlog.md
+  - /workflow/13_retrospective/13_reusable_lessons.md
+  - /workflow/13_retrospective/result.md
+  - /workflow/context/context_packet.md
+context_updates:
+  files_to_update:
+  - path: /workflow/context/context_packet.md
+    condition: Always update or prepare for the next action.
+    update_rule: Include only the minimum operational context needed by the next skill revision work, workflow experiment,
+      or next project intake.
+  - path: /workflow/context/ASSUMPTIONS.md
+    condition: Update if working assumptions exist.
+    update_rule: Record assumptions without treating them as decisions.
+  - path: /workflow/context/OPEN_QUESTIONS.md
+    condition: Update if unresolved questions exist.
+    update_rule: Record questions that may affect later workflow improvement work.
+  - path: /workflow/context/REJECTED_OPTIONS.md
+    condition: Update if options were explicitly rejected or superseded.
+    update_rule: Do not revive rejected workflow or SKILL options unless explicitly reopened.
+  - path: /workflow/context/TRACEABILITY_MATRIX.md
+    condition: Update if retrospective findings, lessons, or backlog items introduce traceability links.
+    update_rule: Use stable IDs and preserve existing links.
+  context_packet:
+    path: /workflow/context/context_packet.md
+    purpose: Prepare minimal context for the next workflow improvement action.
+    next_stage: approved skill revision work, workflow experiment, or Stage 00 of the next project
+    required_sections:
+    - Current Project State
+    - Approved Decisions
+    - Working Assumptions
+    - Open Questions
+    - Rejected / Superseded Options
+    - Constraints That Must Not Be Violated
+    - Key Context for Next Action
+    - Required Inputs for Next Action
+    - Do Not Do
+traceability:
+  id_conventions:
+    findings: RF-001, RF-002
+    failure_patterns: AFP-001, AFP-002
+    reusable_lessons: RL-001, RL-002
+    improvement_items: SIB-001, SIB-002
+    assumptions: A-001, A-002
+    questions: Q-001, Q-002
+    risks: R-001, R-002
+  required_links:
+  - Evidence Source → Retrospective Finding
+  - Retrospective Finding → Agent Failure Pattern or Reusable Lesson
+  - Agent Failure Pattern or Reusable Lesson → Skill Improvement Backlog Item
+  prohibited_links:
+  - Do not link unapproved suggestions as approved SKILL revisions.
+  - Do not make downstream workflow stages depend on internal sub-skill outputs.
+  - Do not treat one-off anecdotes as repeated failure patterns unless clearly labeled.
+classification_rules:
+  approved_decision:
+    rule: Only explicit human approval can create an approved workflow or SKILL decision.
+    examples:
+    - 'Approved: Revise Stage 10 implementation prompt SKILL to require explicit forbidden-change scope.'
+  decision_candidate:
+    rule: Agent recommendations awaiting human approval must be marked as decision candidates.
+  working_assumption:
+    rule: Temporary beliefs needed for progress must remain assumptions until confirmed.
+  open_question:
+    rule: Unresolved issues that may affect later workflow or SKILL work must be recorded as open questions.
+  rejected_option:
+    rule: Explicitly rejected or superseded workflow or SKILL options must be recorded and not revived unless reopened.
+  recommendation:
+    rule: Recommendations are not approved workflow changes and must not be recorded as approved decisions.
+approval_gate:
+  required: true
+  decisions_to_approve:
+  - Final retrospective findings
+  - Reusable lessons to promote
+  - Skill improvement backlog priorities
+  - Skill split/merge/delete/create candidates
+  - Next workflow experiment plan if applicable
+  assumptions_to_confirm:
+  - Unverified evidence limitations
+  - Scope assumptions used during retrospective
+  - Tooling or context limitations that affected findings
+  open_questions_to_resolve:
+  - Which backlog items should be executed first?
+  - Which lessons are project-specific versus reusable?
+  - Which SKILL files may be revised after approval?
+  risks_to_review:
+  - Overgeneralizing one project into universal workflow rules
+  - Changing SKILLs without sufficient evidence
+  - Treating Agent suggestions as approved decisions
+  artifacts_ready_for_review:
+  - /workflow/13_retrospective/13_workflow_retrospective.md
+  - /workflow/13_retrospective/13_agent_failure_patterns.md
+  - /workflow/13_retrospective/13_skill_improvement_backlog.md
+  - /workflow/13_retrospective/13_reusable_lessons.md
+  - /workflow/13_retrospective/result.md
+  - /workflow/context/context_packet.md
+validation:
+  checklist:
+  - All mandatory artifacts are created or updated.
+  - Conditional artifacts are created or have N/A records.
+  - Findings link to evidence or are labeled as hypotheses.
+  - Backlog items link to findings, lessons, or failure patterns.
+  - Human approval gate is explicit.
+  failure_conditions:
+  - Required evidence is missing and scope cannot be narrowed safely.
+  - Sub-skill outputs conflict and cannot be reconciled without human decision.
+  - Approval status of core evidence is unknown and would affect conclusions.
+  blocker_report_required: true
+  blocker_report_fields:
+  - blocking_issue
+  - why_it_matters
+  - affected_artifacts_or_stages
+  - safe_partial_work_completed
+  - human_decision_needed
+prohibited_actions:
+- Do not execute skill revisions during Stage 13.
+- Do not create project-specific product requirements, architecture, database, UI, tests, implementation tasks, or code.
+- Do not create project artifacts outside /workflow/13_retrospective/ and /workflow/context/.
+- Do not treat sub-skill outputs as approved official artifacts before finalization and human approval.
+- Do not update DECISIONS.md without explicit human approval.
+specialization_hooks:
+  allowed: true
+  examples:
+  - name: web_saas
+    may_add:
+    - release-readiness retrospective questions
+    - auth/privacy workflow evidence
+    - deployment and operations lessons
+  - name: internal_tool
+    may_add:
+    - operator workflow questions
+    - organizational approval lessons
+    - manual process integration findings
+  - name: mobile_app
+    may_add:
+    - platform release lessons
+    - device permission workflow findings
+    - offline/sync validation lessons
+  - name: ai_data_product
+    may_add:
+    - data provenance workflow findings
+    - evaluation-metric lessons
+    - human review and model-output risk lessons
+  - name: regulated_security_sensitive
+    may_add:
+    - compliance review lessons
+    - privacy-sensitive workflow findings
+    - audit and risk approval lessons
+  - name: brownfield_legacy
+    may_add:
+    - migration workflow findings
+    - compatibility review lessons
+    - regression baseline lessons
+  must_not_change:
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries
+tool_wrapper_hooks:
+  allowed:
+  - file_creation_commands
+  - save_locations
+  - sandbox_rules
+  - review_workflow
+  - command_invocation_conventions
+  must_not_change:
+  - stage_reasoning
+  - approval_rules
+  - artifact_contract
+  - assumption_handling
+  - traceability_rules
+  - stage_boundaries
