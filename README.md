@@ -1,36 +1,75 @@
-# Manual Agentic Coding Workflow
+# MACOW: Manual Agentic Coding Workflow
 
-A structured, artifact-first workflow for using coding agents in human-controlled software development.
+**MACOW** stands for **Manual Agentic Coding Workflow**.
 
-This repository is not a collection of magic prompts. It is a reusable workflow for experienced developers who want to use LLM-based coding agents such as Claude Code, Codex, Antigravity, or similar tools inside an inspectable software development process.
+MACOW is an educational and experimental workflow for students, self-learners, and instructors who want to study how coding agents behave inside a structured software-development-like process.
+
+This repository is not presented as a production-proven development methodology. It is a learning framework for observing, practicing, and improving the way humans interact with LLM-based coding agents such as Claude Code, Codex, Antigravity, or similar tools.
 
 ```text
-Agentic Coding = structured workflow + reusable skills + human approval gates + traceable artifacts
+MACOW = Manual Agentic Coding Workflow
+      = structured learning workflow + reusable skills + explicit artifacts + human review gates
 ```
+
+## Why the name MACOW?
+
+The name **MACOW** was chosen because it is short, memorable, and directly expands to the core idea of the project:
+
+```text
+Manual     → the human remains in control
+Agentic    → the workflow studies and uses coding agents
+Coding     → the exercises are grounded in software development tasks
+Workflow   → the process is staged, repeatable, and artifact-based
+```
+
+In this repository, **MACOW** always means **Manual Agentic Coding Workflow**.
+
+The word “manual” is important. MACOW does not assume that an agent should autonomously own the software process. Instead, it uses a manual, inspectable, stage-by-stage structure so learners can observe how agents interpret context, make assumptions, produce artifacts, and recover from mistakes.
+
+## Current status
+
+MACOW is currently an **educational and experimental workflow**.
+
+It is suitable for:
+
+- studying agentic coding behavior;
+- practicing structured prompting and artifact-based collaboration;
+- observing agent failure patterns;
+- learning how context, assumptions, requirements, tests, and review gates affect agent output;
+- comparing vague prompting with staged workflow execution.
+
+It is not yet validated as:
+
+- a production-ready software development methodology;
+- a replacement for professional engineering judgment;
+- a guarantee that generated code or design artifacts are correct, secure, or complete.
+
+Use MACOW as a learning environment first. If you adapt it for real software projects, review and test all outputs carefully.
 
 ## What this is
 
-Manual Agentic Coding Workflow is a staged SDLC-style process for developing software with coding agents.
+MACOW is a staged workflow for learning how to use coding agents in a controlled and inspectable way.
 
-The workflow helps a human developer:
+It helps learners practice how to:
 
-- turn an initial idea into approved goals, requirements, domain models, architecture, tasks, tests, implementation prompts, and release artifacts;
-- keep agent work inspectable through explicit markdown/YAML/code artifacts;
-- separate approved decisions from agent assumptions and recommendations;
-- preserve context across agent sessions without relying on chat history;
-- integrate requirements, DDD, TDD, security, privacy, review, and release handoff into one repeatable process.
+- turn an initial idea into goals, requirements, domain models, architecture notes, tasks, tests, prompts, and review artifacts;
+- ask agents to produce explicit markdown/YAML/code artifacts instead of vague chat summaries;
+- distinguish agent proposals from approved human decisions;
+- keep project state in files instead of relying only on chat history;
+- observe how agents handle missing information, conflicting instructions, and context resets;
+- connect requirements, DDD concepts, TDD ideas, security/privacy concerns, and review evidence across a staged process.
 
-The human developer remains the owner of the software process. The agent drafts, analyzes, proposes, implements, and verifies inside structured boundaries.
+The learner remains the owner of the exercise. The agent drafts, analyzes, proposes, implements, and verifies inside structured boundaries.
 
 ## What this is not
 
-This workflow is not:
+MACOW is not:
 
 - an autonomous software engineer;
 - a one-shot app generator;
 - a prompt dump;
-- a replacement for human engineering judgment;
-- a guarantee that generated code is correct, secure, or production-ready;
+- a production-certified SDLC framework;
+- a guarantee that generated code is correct, secure, or deployable;
 - a process where agent output automatically becomes an approved decision.
 
 Important distinctions:
@@ -43,21 +82,38 @@ Agent draft ≠ final artifact
 Agent output ≠ human approval
 ```
 
+These distinctions are central to the learning purpose of MACOW.
+
 ## Who should use this
 
-This workflow is intended for developers who:
+MACOW is intended for:
 
-- already understand software development and want to use coding agents more systematically;
-- want to study how agents reason, fail, recover, and improve;
-- want a repeatable process for greenfield MVPs, internal tools, web applications, AI/data products, or similar systems;
-- want to keep project state in files rather than in a long chat conversation;
-- want to preserve traceability from goals to requirements, tests, tasks, and implementation evidence.
+- students learning how coding agents behave;
+- self-learners experimenting with agentic coding workflows;
+- instructors designing exercises around LLM-based development tools;
+- researchers or educators interested in agent failure patterns, context management, and human-agent collaboration;
+- developers who want to study agentic coding in a low-risk educational setting before applying similar ideas to real projects.
 
-This workflow may feel too heavy if you only need a small one-off code snippet or a quick prototype with no review, testing, or handoff needs.
+MACOW may feel too heavy if you only want a quick answer, a short code snippet, or a one-time prototype.
+
+## Learning goals
+
+MACOW is designed to help learners ask questions such as:
+
+- How does an agent interpret incomplete requirements?
+- When does an agent silently turn assumptions into decisions?
+- How does artifact-based context compare with long chat history?
+- What happens when the same stage is rerun after human feedback?
+- How does requiring acceptance criteria change implementation quality?
+- How does test-first or test-aware prompting affect coding behavior?
+- What kinds of review gates reduce agent drift?
+- Where does human judgment remain essential?
+
+A useful MACOW exercise does not only ask, “Did the agent build something?” It also asks, “What did the agent assume, miss, overgenerate, forget, or improve?”
 
 ## Workflow at a glance
 
-The workflow is organized into 14 stages.
+MACOW is organized into 14 stages.
 
 ```text
 [00] Project Intake / Existing Context Review
@@ -95,7 +151,7 @@ Idea
 → Workflow retrospective and skill improvement
 ```
 
-Each stage produces explicit artifacts. Those artifacts become the input for the next stage after human review and approval.
+Each stage produces explicit artifacts. Those artifacts become learning evidence and, after human review, input for the next stage.
 
 ## Core concepts
 
@@ -111,14 +167,14 @@ It defines:
 - which files should not be read by default;
 - what artifacts the agent must create or update;
 - how assumptions, open questions, risks, and decision candidates must be recorded;
-- what requires human approval;
+- what requires human review;
 - how context must be handed off to the next stage.
 
-A skill is not merely a prompt. It is closer to a reusable operating procedure.
+A skill is not merely a prompt. In MACOW, a skill is closer to a reusable learning procedure for observing agent behavior.
 
-### Artifact-first workflow
+### Artifact-first learning
 
-The workflow relies on files as the source of operational truth.
+MACOW relies on files as the source of operational context.
 
 Typical artifacts include:
 
@@ -133,11 +189,11 @@ Typical artifacts include:
 - `11_test_evidence_<task_id>.md`
 - `12_release_readiness.md`
 
-Chat history can help during one session, but downstream stages should depend on approved artifacts, not on previous conversation memory.
+Chat history can help during one session, but downstream stages should depend on reviewed artifacts, not on previous conversation memory.
 
-### Human approval gates
+### Human review gates
 
-At the end of each stage, the agent must identify:
+At the end of each stage, the agent should identify:
 
 - decisions to approve;
 - assumptions to confirm;
@@ -146,11 +202,11 @@ At the end of each stage, the agent must identify:
 - artifacts ready for review;
 - recommended next step.
 
-The human developer decides what becomes approved project direction.
+For MACOW learning exercises, a review gate is not only a project-control mechanism. It is also a learning checkpoint where students can inspect how the agent reasoned and where it may have gone wrong.
 
 ### Context management
 
-The workflow uses persistent context files such as:
+MACOW uses persistent context files such as:
 
 ```text
 /workflow/context/context_packet.md
@@ -164,9 +220,11 @@ The workflow uses persistent context files such as:
 
 `context_packet.md` is not a complete project history. It is a concise navigation layer that tells the next stage what it needs to know and which artifacts it should read.
 
+This makes MACOW useful for studying what happens when an agent session is reset and restarted from files only.
+
 ### Traceability
 
-The workflow encourages traceability across the development process:
+MACOW encourages traceability across the learning exercise:
 
 ```text
 Goal
@@ -180,22 +238,24 @@ Goal
 → Implementation Evidence
 ```
 
-This helps prevent design drift, uncontrolled scope expansion, and implementation without validation.
+Traceability helps learners see whether an agent preserves intent across stages or drifts away from the approved context.
 
 ## Recommended repository structure
 
-A reusable workflow repository may use this structure:
+A reusable MACOW repository may use this structure:
 
 ```text
 /
   README.md
   QUICKSTART.md
+  CONCEPT.md
   WORKFLOW_OVERVIEW.md
   EXECUTION_GUIDE.md
   REPOSITORY_STRUCTURE.md
   GLOSSARY.md
   FAQ.md
   CONTRIBUTING.md
+  LICENSE
 
 /docs
   /concepts
@@ -226,7 +286,7 @@ A reusable workflow repository may use this structure:
   /13_workflow_retrospective
 ```
 
-A project using this workflow may create a separate `/workflow` directory inside the target project:
+A learning project using MACOW may create a separate `/workflow` directory inside the target project:
 
 ```text
 /workflow
@@ -260,33 +320,35 @@ A project using this workflow may create a separate `/workflow` directory inside
 
 Read [`QUICKSTART.md`](./QUICKSTART.md) first.
 
-The shortest path is:
+The shortest learning path is:
 
 ```text
-1. Prepare a target project folder.
+1. Prepare a small practice project idea.
 2. Create /workflow and /workflow/context folders.
 3. Run Stage 00 Project Intake with an agent.
 4. Review the generated artifacts.
-5. Approve, revise, or reject decision candidates.
+5. Mark decision candidates, assumptions, and open questions.
 6. Continue to Stage 01 Service Goal Definition.
+7. Keep notes about where the agent performed well or failed.
 ```
 
-Do not start by asking an agent to implement the product immediately. Start by creating approved context and artifacts.
+Do not start by asking an agent to implement the product immediately. Start by creating context and artifacts that can be inspected.
 
 ## How stage execution works
 
-A normal stage execution follows this pattern:
+A normal MACOW stage execution follows this pattern:
 
 ```text
 1. Read the stage SKILL.md.
 2. Read the required context files.
-3. Read approved source artifacts from previous stages.
+3. Read reviewed source artifacts from previous stages.
 4. Check USER_DIRECTIVES.md if it exists.
 5. Identify missing or conflicting information.
 6. Produce or update stage artifacts.
 7. Separate approved decisions, decision candidates, assumptions, open questions, risks, and recommendations.
 8. Update context for the next stage.
-9. Present a human approval gate.
+9. Present a human review gate.
+10. Record what the learner observed about the agent's behavior.
 ```
 
 The agent should not read every historical file by default. Each skill defines what to always read, what to read only if applicable, and what not to read unless explicitly needed.
@@ -312,33 +374,47 @@ Example:
 
 The parent stage remains the public interface. Internal sub-skills are implementation details.
 
-Downstream stages must depend only on approved official stage artifacts, not on internal sub-skill folders, prompt history, or unapproved draft outputs.
+Downstream stages must depend only on reviewed official stage artifacts, not on internal sub-skill folders, prompt history, or unreviewed draft outputs.
 
 ## Status labels
 
 Recommended artifact status labels:
 
-| Status | Meaning |
+| Status | Meaning in MACOW |
 |---|---|
-| `Draft` | Created or revised by the agent, not yet approved. |
+| `Draft` | Created or revised by the agent, not yet reviewed. |
 | `Needs Review` | Ready for human review; may contain decisions, assumptions, or open questions. |
-| `Approved` | Explicitly approved by the human developer. Downstream stages may rely on it. |
+| `Approved` | Approved for the current learning exercise. This does not mean production-certified. |
 | `Superseded` | Replaced by a newer artifact or decision. |
-| `Rejected` | Should not be used unless explicitly reopened by the human developer. |
+| `Rejected` | Should not be used unless explicitly reopened by the learner or instructor. |
+
+## Suggested learning exercises
+
+MACOW can be used for exercises such as:
+
+- compare a vague one-shot prompt with a staged MACOW execution;
+- run the same stage twice with different `USER_DIRECTIVES.md` files and compare outputs;
+- ask the agent to proceed with incomplete inputs and inspect its assumptions;
+- intentionally introduce a conflict between artifacts and observe how the agent reports it;
+- clear the agent context and restart from `context_packet.md` and approved artifacts;
+- inspect whether implementation tasks remain traceable to requirements and tests;
+- run Stage 13 to create a retrospective of agent strengths, weaknesses, and failure patterns.
 
 ## Common mistakes to avoid
 
 Avoid these patterns:
 
-- starting implementation before goals and requirements are approved;
+- treating MACOW as a production-certified development process;
+- starting implementation before goals and requirements are reviewed;
 - treating agent suggestions as final decisions;
 - using `context_packet.md` as the only source of truth;
 - reading all previous files by default;
-- allowing downstream stages to rely on unapproved drafts;
+- allowing downstream stages to rely on unreviewed drafts;
 - skipping acceptance criteria and test strategy;
 - creating implementation prompts without allowed scope, forbidden changes, required tests, and evidence requirements;
 - claiming tests passed without recorded evidence;
-- reviving rejected options without explicit human approval.
+- reviving rejected options without explicit human approval;
+- focusing only on whether the agent produced code instead of studying how and why it produced that code.
 
 ## Documentation map
 
@@ -347,14 +423,15 @@ Suggested reading order:
 ```text
 1. README.md
 2. QUICKSTART.md
-3. WORKFLOW_OVERVIEW.md
-4. EXECUTION_GUIDE.md
-5. docs/reference/stage_00_project_intake.md
-6. docs/reference/stage_01_service_goal_definition.md
-7. docs/concepts/*.md as needed
+3. CONCEPT.md
+4. WORKFLOW_OVERVIEW.md
+5. EXECUTION_GUIDE.md
+6. docs/reference/stage_00_project_intake.md
+7. docs/reference/stage_01_service_goal_definition.md
+8. docs/concepts/*.md as needed
 ```
 
-If you are extending the workflow, read:
+If you are extending MACOW, read:
 
 ```text
 workflow_templates/core/core_skill_template.md
@@ -365,15 +442,16 @@ workflow_templates/tool_wrappers/*.md
 
 ## Contributing
 
-Contributions should preserve the core principles:
+Contributions should preserve the core learning principles:
 
 - artifact-first execution;
-- human approval gates;
+- human review gates;
 - clear distinction between decisions, assumptions, and recommendations;
 - stable stage boundaries;
 - traceability from goals to implementation evidence;
 - context-reset tolerance;
-- reusable skills rather than project-specific prompts.
+- reusable skills rather than project-specific prompts;
+- explicit recording of agent failure patterns and learning observations.
 
 When adding or changing a skill, update its `README.md` and `artifact_contract.yml` so the human-facing guide, executable skill, and structured contract remain consistent.
 
